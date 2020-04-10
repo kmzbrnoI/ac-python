@@ -115,9 +115,9 @@ def _connect(server: str, port: int) -> socket.socket:
 def init(server: str, port: int) -> None:
     global panel_socket
 
-    logging.debug(f'Initializing connection to {server}:{port}...')
+    logging.info(f'Initializing connection to {server}:{port}...')
     sock = _connect(server, port)
-    logging.debug('Socket opened')
+    logging.info('Socket opened')
     panel_socket = sock
 
     send('-;HELLO;{0}'.format(CLIENT_PROTOCOL_VERSION), sock)

@@ -10,12 +10,12 @@ class State(Enum):
     PAUSED = 2
 
 
-ACEvent = Callable[[str], None]
+ACEvent = Callable[['AC'], None]
 
 
 class AC:
     def __init__(self, _id: str) -> None:
-        self._id = _id
+        self.id = _id
         self.state = State.STOPPED
 
         self.on_register: Optional[ACEvent] = None
@@ -36,19 +36,19 @@ class AC:
 
     def call(self, event: Optional[ACEvent]) -> None:
         if event is not None:
-            event(self._id)
+            event(self)
 
     def done(self) -> None:
-        panel_client.send(f'-;AC;{self._id};CONTROL:DONE')
+        panel_client.send(f'-;AC;{self.id};CONTROL:DONE')
 
     def error(self) -> None:  # TODO
-        panel_client.send(f'-;AC;{self._id};CONTROL:ERROR;')
+        panel_client.send(f'-;AC;{self.id};CONTROL:ERROR;')
 
     def register(self, password: str) -> None:
-        panel_client.send(f'-;AC;{self._id};LOGIN;{password}')
+        panel_client.send(f'-;AC;{self.id};LOGIN;{password}')
 
     def unregister(self) -> None:
-        panel_client.send(f'-;AC;{self._id};LOGOUT')
+        panel_client.send(f'-;AC;{self.id};LOGOUT')
 
     def on_message(self, parsed: List[str]) -> None:
         if parsed[3] == 'AUTH':
@@ -62,11 +62,10 @@ class AC:
 
         elif parsed[3] == 'CONTROL':
             assert len(parsed) >= 5
-
             remap = {
                 'START': State.RUNNING,
                 'STOP': State.STOPPED,
-                'PAUSED': State.PAUSED,
+                'PAUSE': State.PAUSED,
                 'RESUME': State.RUNNING,
             }
             self.state = remap[parsed[4].upper()]

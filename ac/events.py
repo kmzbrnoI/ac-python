@@ -32,3 +32,27 @@ def on_start(id_: str) -> Callable[[str], None]:
         return function
 
     return decorate
+
+
+def on_stop(id_: str) -> Callable[[str], None]:
+    def decorate(function: Callable[[str], None]):
+        ACs[id_].on_stop = function
+        return function
+
+    return decorate
+
+
+def on_resume(id_: str) -> Callable[[str], None]:
+    def decorate(function: Callable[[str], None]):
+        ACs[id_].on_resume = function
+        return function
+
+    return decorate
+
+
+def on_pause(id_: str) -> Callable[[str], None]:
+    def decorate(function: Callable[[str], None]):
+        ACs[id_].on_pause = function
+        return function
+
+    return decorate
