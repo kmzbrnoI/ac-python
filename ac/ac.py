@@ -62,6 +62,15 @@ class AC:
 
         elif parsed[3] == 'CONTROL':
             assert len(parsed) >= 5
+
+            remap = {
+                'START': State.RUNNING,
+                'STOP': State.STOPPED,
+                'PAUSED': State.PAUSED,
+                'RESUME': State.RUNNING,
+            }
+            self.state = remap[parsed[4].upper()]
+
             event = 'on_' + parsed[4].lower()
             if hasattr(self, event):
                 self.call(getattr(self, event))
