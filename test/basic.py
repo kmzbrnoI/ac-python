@@ -5,6 +5,8 @@ import ac
 import ac.blocks
 from ac import ACs, AC, State
 
+HOSTNAME = '192.168.0.168'
+PORT = 5896
 AC_ID = '5000'
 
 
@@ -52,4 +54,4 @@ def on_block_change_(block: ac.Block) -> None:
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    ac.init('192.168.0.168', 5896)
+    ac.init(HOSTNAME, PORT)
