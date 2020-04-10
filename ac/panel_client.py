@@ -6,7 +6,7 @@ import traceback
 
 from . import message_parser
 from . import events
-from . import register
+from .ac import ACs
 
 CLIENT_PROTOCOL_VERSION = '1.1'
 
@@ -88,9 +88,9 @@ def _process_message(sock: socket.socket, message: str) -> None:
             send('-;PONG;{0}'.format(parsed[3]), sock)
         else:
             send('-;PONG', sock)
-    elif len(parsed) >= 4 and parsed[0] == '-' and parsed[1] == 'AC':
-        if parsed[3] == 'AUTH':
-            register.on_register_message(parsed)
+    elif (len(parsed) >= 4 and parsed[0] == '-' and parsed[1] == 'AC' and
+            parsed[2] != '-'):
+        ACs[parsed[2]].on_message(parsed)
 
 
 def _process_hello(parsed: List[str]) -> None:

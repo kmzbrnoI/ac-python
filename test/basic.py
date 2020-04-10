@@ -2,6 +2,7 @@
 
 import logging
 import ac
+from ac import ACs
 
 AC_ID = '5000'
 
@@ -9,12 +10,17 @@ AC_ID = '5000'
 @ac.on_connect
 def on_connect():
     print('Connected')
-    ac.register(AC_ID, 'loskarlos')
+    ACs[AC_ID].register('loskarlos')
 
 
 @ac.on_register(AC_ID)
 def on_register(id_: str):
     print(f'Registered {id_}')
+
+
+@ac.on_start(AC_ID)
+def on_start(id_: str):
+    print(f'Start {id_}')
 
 
 def main() -> None:
