@@ -55,7 +55,7 @@ class AC:
                 traceback.print_exc()
 
     def done(self) -> None:
-        panel_client.send(f'-;AC;{self.id};CONTROL:DONE')
+        panel_client.send(f'-;AC;{self.id};CONTROL;DONE')
 
     def error(self) -> None:  # TODO
         panel_client.send(f'-;AC;{self.id};CONTROL:ERROR;')
