@@ -75,7 +75,8 @@ def _send_all_registrations() -> None:
     global events
 
     all_ = set(list(events.keys()))
-    register(all_)
+    if all_:
+        register(all_)
 
 
 def on_message(parsed: List[str]) -> None:
