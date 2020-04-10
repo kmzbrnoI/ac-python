@@ -4,7 +4,9 @@ import logging
 from typing import Optional, List
 import traceback
 
-import message_parser
+from .message_parser import parse
+
+CLIENT_PROTOCOL_VERSION = '1.1'
 
 panel_socket: Optional[socket.socket] = None
 
@@ -67,7 +69,7 @@ def _send(message: str, sock: Optional[socket.socket] = None) -> None:
 
 
 def _process_message(sock: socket.socket, message: str) -> None:
-    parsed = message_parser.parse(message, ';')
+    parsed = parse(message, ';')
     if len(parsed) < 2:
         return
 
@@ -102,6 +104,10 @@ def _connect(server: str, port: int) -> socket.socket:
 
 
 def init(server: str, port: int) -> None:
+    logging.debug(f'Initializing connection to {server}:{port}...')
     sock = _connect(server, port)
+    logging.debug('Socket opened')
     panel_socket = sock
+
+    _send('-;HELLO;{0}'.format(CLIENT_PROTOCOL_VERSION), sock)
     _listen(sock)
