@@ -2,6 +2,7 @@
 
 import logging
 import ac
+import ac.blocks
 from ac import ACs, AC, State
 
 AC_ID = '5000'
@@ -11,6 +12,7 @@ AC_ID = '5000'
 def on_connect():
     logging.info('connected')
     ACs[AC_ID].register('loskarlos')
+    ac.blocks.register([5, 6, 7])
 
 
 @ac.on_register(AC_ID)
@@ -37,8 +39,18 @@ def on_pause(ac: AC):
     assert ac.state == State.PAUSED
 
 
+@ac.blocks.on_block_change()
+def on_block_change(block: ac.Block) -> None:
+    print(f'Changed: {block}')
+
+
+@ac.blocks.on_block_change(1, 2)
+def on_block_change(block: ac.Block) -> None:
+    print(f'Changed 1|2: {block}')
+
+
 def main() -> None:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     ac.init('192.168.0.168', 5896)
 
 

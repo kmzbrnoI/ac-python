@@ -7,6 +7,7 @@ import traceback
 from . import message_parser
 from . import events
 from .ac import ACs
+from . import blocks
 
 CLIENT_PROTOCOL_VERSION = '1.1'
 
@@ -88,9 +89,11 @@ def _process_message(sock: socket.socket, message: str) -> None:
             send('-;PONG;{0}'.format(parsed[3]), sock)
         else:
             send('-;PONG', sock)
-    elif (len(parsed) >= 4 and parsed[0] == '-' and parsed[1] == 'AC' and
-            parsed[2] != '-'):
-        ACs[parsed[2]].on_message(parsed)
+    elif (len(parsed) >= 4 and parsed[0] == '-' and parsed[1] == 'AC'):
+        if parsed[2] != '-':
+            ACs[parsed[2]].on_message(parsed)
+        elif parsed[2] == '-' and parsed[3].upper() == 'BLOCKS':
+            blocks.on_message(parsed)
 
 
 def _process_hello(parsed: List[str]) -> None:
@@ -103,6 +106,7 @@ def _process_hello(parsed: List[str]) -> None:
 
     if events.ev_on_connect is not None:
         events.ev_on_connect()
+    blocks._send_all_registrations()
 
 
 def _connect(server: str, port: int) -> socket.socket:
