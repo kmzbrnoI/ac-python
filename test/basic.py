@@ -42,12 +42,12 @@ def on_pause(ac: AC):
 
 @ac.blocks.on_block_change()
 def on_block_change(block: ac.Block) -> None:
-    print(f'Changed: {block}')
+    print(f'Changed: {block["nazev"]}')
 
 
 @ac.blocks.on_block_change(1, 2)
 def on_block_change_(block: ac.Block) -> None:
-    print(f'Changed 1|2: {block}')
+    print(f'Changed 1|2: {block["nazev"]}')
 
 
 if __name__ == '__main__':

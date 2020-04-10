@@ -3,6 +3,7 @@ from collections import defaultdict
 import logging
 
 from . import panel_client
+from . import pt
 
 Block = Dict[str, Any]
 BlockEvent = Callable[[Block], None]
@@ -86,7 +87,8 @@ def on_message(parsed: List[str]) -> None:
 
 
 def _call_change(id_: str) -> None:
+    pt_block = pt.get(f'/bloky/{id_}?stav=true')['blok']
     for event in global_events:
-        event({})
+        event(pt_block)
     for event in events[id_]:
-        event({})
+        event(pt_block)
