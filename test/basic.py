@@ -3,6 +3,14 @@
 import logging
 import ac
 
+AC_ID = '5000'
+
+
+@ac.on_connect
+def on_connect():
+    print('Connected')
+    ac.register(AC_ID, 'loskarlos')
+
 
 def main() -> None:
     logging.basicConfig(level=logging.DEBUG)

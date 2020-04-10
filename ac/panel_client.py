@@ -4,7 +4,9 @@ import logging
 from typing import Optional, List
 import traceback
 
-from .message_parser import parse
+from . import message_parser
+from . import events
+from . import register
 
 CLIENT_PROTOCOL_VERSION = '1.1'
 
@@ -55,8 +57,9 @@ def _listen(sock: socket.socket) -> None:
         logging.error('Connection error: {0}'.format(e))
 
 
-def _send(message: str, sock: Optional[socket.socket] = None) -> None:
+def send(message: str, sock: Optional[socket.socket] = None) -> None:
     if sock is None:
+        global panel_socket
         sock = panel_socket
     assert sock is not None
 
@@ -69,22 +72,25 @@ def _send(message: str, sock: Optional[socket.socket] = None) -> None:
 
 
 def _process_message(sock: socket.socket, message: str) -> None:
-    parsed = parse(message, ';')
+    parsed = message_parser.parse(message, ';')
     if len(parsed) < 2:
         return
 
     parsed[1] = parsed[1].upper()
+    if len(parsed) > 3:
+        parsed[3] = parsed[3].upper()
 
     if parsed[1] == 'HELLO':
         _process_hello(parsed)
     elif (parsed[1] == 'PING' and len(parsed) > 2 and
           parsed[2].upper() == 'REQ-RESP'):
         if len(parsed) > 3:
-            _send('-;PONG;{0}'.format(parsed[3]), sock)
+            send('-;PONG;{0}'.format(parsed[3]), sock)
         else:
-            _send('-;PONG', sock)
-    else:
-        pass
+            send('-;PONG', sock)
+    elif len(parsed) >= 4 and parsed[0] == '-' and parsed[1] == 'AC':
+        if parsed[3] == 'CONTROL':
+            register.on_register_message(parsed)
 
 
 def _process_hello(parsed: List[str]) -> None:
@@ -95,6 +101,9 @@ def _process_hello(parsed: List[str]) -> None:
         raise OutdatedVersionError('Outdated version of server protocol: '
                                    '{0}!'.format(version))
 
+    if events.ev_on_connect is not None:
+        events.ev_on_connect()
+
 
 def _connect(server: str, port: int) -> socket.socket:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -104,10 +113,12 @@ def _connect(server: str, port: int) -> socket.socket:
 
 
 def init(server: str, port: int) -> None:
+    global panel_socket
+
     logging.debug(f'Initializing connection to {server}:{port}...')
     sock = _connect(server, port)
     logging.debug('Socket opened')
     panel_socket = sock
 
-    _send('-;HELLO;{0}'.format(CLIENT_PROTOCOL_VERSION), sock)
+    send('-;HELLO;{0}'.format(CLIENT_PROTOCOL_VERSION), sock)
     _listen(sock)
