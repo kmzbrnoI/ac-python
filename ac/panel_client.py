@@ -3,6 +3,7 @@ import socket
 import logging
 from typing import Optional, List
 import traceback
+import time
 
 from . import message_parser
 from . import events
@@ -111,7 +112,7 @@ def _process_hello(parsed: List[str]) -> None:
 
 def _connect(server: str, port: int) -> socket.socket:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(50)
+    sock.settimeout(10)
     sock.connect((server, port))
     return sock
 
@@ -119,10 +120,17 @@ def _connect(server: str, port: int) -> socket.socket:
 def init(server: str, port: int) -> None:
     global panel_socket
 
-    logging.info(f'Initializing connection to {server}:{port}...')
-    sock = _connect(server, port)
-    logging.info('Socket opened')
-    panel_socket = sock
+    while True:
+        try:
+            logging.info(f'Initializing connection to {server}:{port}...')
+            sock = _connect(server, port)
+            logging.info('Socket opened')
+            panel_socket = sock
+            send('-;HELLO;{0}'.format(CLIENT_PROTOCOL_VERSION), sock)
+            _listen(sock)
+        except DisconnectedError:
+            logging.info('Disconnected from server')
+        except socket.timeout:
+            logging.info('Unable to connect to server')
 
-    send('-;HELLO;{0}'.format(CLIENT_PROTOCOL_VERSION), sock)
-    _listen(sock)
+        time.sleep(1)

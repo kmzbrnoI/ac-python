@@ -49,10 +49,6 @@ def on_block_change(block: ac.Block) -> None:
     print(f'Changed 1|2: {block}')
 
 
-def main() -> None:
+if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     ac.init('192.168.0.168', 5896)
-
-
-if __name__ == '__main__':
-    main()
