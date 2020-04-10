@@ -106,7 +106,10 @@ def _process_hello(parsed: List[str]) -> None:
                                    '{0}!'.format(version))
 
     if events.ev_on_connect is not None:
-        events.ev_on_connect()
+        try:
+            events.ev_on_connect()
+        except:
+            traceback.print_exc()
     blocks._send_all_registrations()
 
 

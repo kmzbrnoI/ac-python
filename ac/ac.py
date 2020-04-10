@@ -39,7 +39,10 @@ class AC:
 
     def call(self, event: Optional[ACEvent]) -> None:
         if event is not None:
-            event(self)
+            try:
+                event(self)
+            except:
+                traceback.print_exc()
 
     def done(self) -> None:
         panel_client.send(f'-;AC;{self.id};CONTROL:DONE')
