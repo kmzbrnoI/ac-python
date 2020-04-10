@@ -1,3 +1,8 @@
+"""
+Utils for interaction with PT server. These functions should not be used by
+user. User should interact through instance of AC.
+"""
+
 import urllib.request
 import json
 from typing import Dict, Any

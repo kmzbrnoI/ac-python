@@ -1,3 +1,5 @@
+"""Panel client socket management"""
+
 from collections import deque
 import socket
 import logging
@@ -61,6 +63,7 @@ def _listen(sock: socket.socket) -> None:
 
 
 def send(message: str, sock: Optional[socket.socket] = None) -> None:
+    """Send message to server."""
     if sock is None:
         global panel_socket
         sock = panel_socket
@@ -122,6 +125,8 @@ def _connect(server: str, port: int) -> socket.socket:
 
 
 def init(server: str, port: int) -> None:
+    """Infinite function to open & keep open socket with Panel server.
+    Triest to restore connection in case of connection loss."""
     global panel_socket
     pt.server = server
 

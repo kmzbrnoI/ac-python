@@ -1,6 +1,4 @@
-"""
-This file is a parser helper. It allows parsing data from server.
-"""
+"""This file is a parser helper. It allows parsing data from server."""
 
 from typing import List
 

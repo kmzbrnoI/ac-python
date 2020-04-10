@@ -1,9 +1,12 @@
+"""Panel server block interaction (on_change)"""
+
 from typing import Dict, Any, Callable, List, Iterable, Union, Set, Tuple
 from collections import defaultdict
 import logging
 
 from . import panel_client
 from . import pt
+
 
 Block = Dict[str, Any]
 BlockEvent = Callable[[Block], None]

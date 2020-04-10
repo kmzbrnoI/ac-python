@@ -1,3 +1,6 @@
+"""Package event definitions. This file implements decorators to easily
+register events. See examples below."""
+
 from typing import Callable
 from .ac import ACs, AC
 

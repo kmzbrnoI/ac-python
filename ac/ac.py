@@ -1,3 +1,5 @@
+"""AC class definition & AC storage definition."""
+
 from enum import Enum
 from typing import Callable, Optional, List, Any, Dict, TypeVar, DefaultDict
 import logging
@@ -17,6 +19,12 @@ ACEvent = Callable[['AC'], None]
 
 
 class AC:
+    """
+    AC class represents a single AC. It holds its state and allows user
+    to call methods on it. Interaction with Panel Server as well as PT Server
+    should go throug instance of AC.
+    """
+
     def __init__(self, _id: str) -> None:
         self.id = _id
         self.password = ''
@@ -102,9 +110,8 @@ class keydefaultdict(DefaultDict[KT, VT]):
     def __missing__(self, key: KT) -> VT:
         if self.default_factory is None:
             raise KeyError(key)
-        else:
-            ret = self[key] = self.default_factory(key)  # type: ignore
-            return ret
+        ret = self[key] = self.default_factory(key)  # type: ignore
+        return ret
 
 
 ACs: keydefaultdict[str, AC] = keydefaultdict(AC)  # type: ignore
