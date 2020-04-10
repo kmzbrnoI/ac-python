@@ -1,9 +1,11 @@
 from enum import Enum
-from typing import Callable, Optional, List
+from typing import Callable, Optional, List, Any, Dict
 from collections import defaultdict
 import logging
+import traceback
 
 from . import panel_client
+from . import pt
 
 
 class State(Enum):
@@ -18,6 +20,7 @@ ACEvent = Callable[['AC'], None]
 class AC:
     def __init__(self, _id: str) -> None:
         self.id = _id
+        self.password = ''
         self.state = State.STOPPED
         self.registered = False
 
@@ -51,9 +54,11 @@ class AC:
         panel_client.send(f'-;AC;{self.id};CONTROL:ERROR;')
 
     def register(self, password: str) -> None:
+        self.password = password
         panel_client.send(f'-;AC;{self.id};LOGIN;{password}')
 
     def unregister(self) -> None:
+        self.password = ''
         panel_client.send(f'-;AC;{self.id};LOGOUT')
 
     def on_message(self, parsed: List[str]) -> None:
@@ -82,6 +87,12 @@ class AC:
             event = 'on_' + parsed[4].lower()
             if hasattr(self, event):
                 self.call(getattr(self, event))
+
+    def pt_get(self, path: str) -> Dict[str, Any]:
+        return pt.get(path)
+
+    def pt_put(self, path: str, req_data: Dict[str, Any]) -> Dict[str, Any]:
+        return pt.put(path, req_data, self.id, self.password)
 
 
 class keydefaultdict(defaultdict):

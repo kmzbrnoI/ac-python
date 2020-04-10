@@ -25,6 +25,7 @@ def on_register(ac: AC):
 def on_start(ac: AC):
     logging.info(f'{ac.id}: start')
     assert ac.state == State.RUNNING
+    assert 'blokStav' in ac.pt_put('/blokStav/1', {'blokStav': {}})
 
 
 @ac.on_stop(AC_ID)

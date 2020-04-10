@@ -9,6 +9,7 @@ from . import message_parser
 from . import events
 from .ac import ACs
 from . import blocks
+from . import pt
 
 CLIENT_PROTOCOL_VERSION = '1.1'
 
@@ -122,6 +123,7 @@ def _connect(server: str, port: int) -> socket.socket:
 
 def init(server: str, port: int) -> None:
     global panel_socket
+    pt.server = server
 
     while True:
         try:
