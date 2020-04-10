@@ -1,6 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional, List, Any, Dict
-from collections import defaultdict
+from typing import Callable, Optional, List, Any, Dict, TypeVar, DefaultDict
 import logging
 import traceback
 
@@ -95,13 +94,17 @@ class AC:
         return pt.put(path, req_data, self.id, self.password)
 
 
-class keydefaultdict(defaultdict):
-    def __missing__(self, key):
+KT = TypeVar('KT')
+VT = TypeVar('VT')
+
+
+class keydefaultdict(DefaultDict[KT, VT]):
+    def __missing__(self, key: KT) -> VT:
         if self.default_factory is None:
             raise KeyError(key)
         else:
-            ret = self[key] = self.default_factory(key)
+            ret = self[key] = self.default_factory(key)  # type: ignore
             return ret
 
 
-ACs = keydefaultdict(AC)
+ACs: keydefaultdict[str, AC] = keydefaultdict(AC)  # type: ignore

@@ -1,4 +1,4 @@
-from typing import Dict, Any, Callable, List, Iterable, Union
+from typing import Dict, Any, Callable, List, Iterable, Union, Set, Tuple
 from collections import defaultdict
 import logging
 
@@ -7,12 +7,14 @@ from . import pt
 
 Block = Dict[str, Any]
 BlockEvent = Callable[[Block], None]
-events: Dict[str, List[BlockEvent]] = defaultdict(set)
-global_events: List[BlockEvent] = set()
+BlockDecorator = Callable[[BlockEvent], BlockEvent]
+events: Dict[str, Set[BlockEvent]] = defaultdict(set)
+global_events: Set[BlockEvent] = set()
 
 
-def on_block_change(*args, **kwargs) -> BlockEvent:
-    def decorate(function: BlockEvent):
+def on_block_change(*args: Union[int, str],
+                    **kwargs: Dict[str, Any]) -> BlockDecorator:
+    def decorate(function: BlockEvent) -> BlockEvent:
         global events
         global global_events
 
@@ -26,7 +28,8 @@ def on_block_change(*args, **kwargs) -> BlockEvent:
     return decorate
 
 
-def register_change(func: BlockEvent, *args, **kwargs) -> None:
+def register_change(func: BlockEvent, *args: str,
+                    **kwargs: Tuple[str, Any]) -> None:
     global events, global_events
 
     for block_id in args:
@@ -38,7 +41,8 @@ def register_change(func: BlockEvent, *args, **kwargs) -> None:
             global_events.add(func)
 
 
-def unregister_change(func: BlockEvent, *args, **kwargs) -> None:
+def unregister_change(func: BlockEvent, *args: str,
+                      **kwargs: Tuple[str, Any]) -> None:
     global events, global_events
 
     for block_id in args:
@@ -58,10 +62,10 @@ def unregister(blocks: Iterable[Union[str, int]]) -> None:
     _send('unregister', blocks)
 
 
-def _send(command: str, blocks: Iterable[Union[str, int]]):
-    blocks = map(str, blocks)
+def _send(command: str, blocks: Iterable[Union[str, int]]) -> None:
+    _blocks = map(str, blocks)
     panel_client.send('-;AC;-;BLOCKS;' + command.upper() +
-                      ';{' + (','.join(blocks))+'}')
+                      ';{' + (','.join(_blocks))+'}')
 
 
 def _send_all_registrations() -> None:

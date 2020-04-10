@@ -11,33 +11,33 @@ AC_ID = '5000'
 
 
 @ac.on_connect
-def on_connect():
+def on_connect() -> None:
     logging.info('connected')
     ACs[AC_ID].register('loskarlos')
     ac.blocks.register([5, 6, 7])
 
 
 @ac.on_register(AC_ID)
-def on_register(ac: AC):
+def on_register(ac: AC) -> None:
     logging.info(f'{ac.id}: registered')
 
 
 @ac.on_resume(AC_ID)
 @ac.on_start(AC_ID)
-def on_start(ac: AC):
+def on_start(ac: AC) -> None:
     logging.info(f'{ac.id}: start')
     assert ac.state == State.RUNNING
     assert 'blokStav' in ac.pt_put('/blokStav/1', {'blokStav': {}})
 
 
 @ac.on_stop(AC_ID)
-def on_stop(ac: AC):
+def on_stop(ac: AC) -> None:
     logging.info(f'{ac.id}: stop')
     assert ac.state == State.STOPPED
 
 
 @ac.on_pause(AC_ID)
-def on_pause(ac: AC):
+def on_pause(ac: AC) -> None:
     logging.info(f'{ac.id}: pause')
     assert ac.state == State.PAUSED
 

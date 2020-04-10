@@ -25,7 +25,7 @@ def _send(path: str, method: str, req_data: Dict[str, Any],
     )
     with urllib.request.urlopen(req) as response:
         data = response.read().decode('utf-8')
-    return json.loads(data)
+    return json.loads(data)  # type: ignore
 
 
 def get(path: str) -> Dict[str, Any]:
@@ -33,5 +33,5 @@ def get(path: str) -> Dict[str, Any]:
 
 
 def put(path: str, req_data: Dict[str, Any], username: str,
-        password: str) -> None:
+        password: str) -> Dict[str, Any]:
     return _send(path, 'PUT', req_data, username, password)
