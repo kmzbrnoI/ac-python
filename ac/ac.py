@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Callable, Optional, List
 from collections import defaultdict
+import logging
+
 from . import panel_client
 
 
@@ -17,6 +19,7 @@ class AC:
     def __init__(self, _id: str) -> None:
         self.id = _id
         self.state = State.STOPPED
+        self.registered = False
 
         self.on_register: Optional[ACEvent] = None
         self.on_unregister: Optional[ACEvent] = None
@@ -54,10 +57,13 @@ class AC:
         if parsed[3] == 'AUTH':
             assert len(parsed) >= 5
             if parsed[4] == 'ok':
+                self.registered = True
                 self.call(self.on_register)
             elif parsed[4] == 'nok':  # TODO
-                pass
+                self.registered = False
+                logging.error(f'Registration error {parsed[5]}: {parsed[6]}')
             elif parsed[4] == 'logout':
+                self.registered = False
                 self.call(self.on_unregister)
 
         elif parsed[3] == 'CONTROL':
