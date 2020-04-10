@@ -7,17 +7,13 @@ server = ''
 PORT = 5823
 
 
-def get(path: str) -> Dict[str, Any]:
-    return _send(path, 'GET', {})
-
-
 def _send(path: str, method: str, req_data: Dict[str, Any],
           user: str = '', password: str = '') -> Dict[str, Any]:
     if not path.startswith('/'):
         path = '/' + path
 
-    base64string = base64.b64encode(('%s:%s' % (user, password)).\
-                        encode('utf-8')).decode('utf-8')
+    base64string = base64.b64encode(('%s:%s' % (user, password)).
+                                    encode('utf-8')).decode('utf-8')
     req = urllib.request.Request(
         f'http://{server}:{PORT}{path}',
         headers={
@@ -28,9 +24,14 @@ def _send(path: str, method: str, req_data: Dict[str, Any],
         data=json.dumps(req_data).encode('utf-8'),
     )
     with urllib.request.urlopen(req) as response:
-       data = response.read().decode('utf-8')
+        data = response.read().decode('utf-8')
     return json.loads(data)
 
 
-def put(path: str, req_data: Dict[str, Any], username: str, password: str) -> None:
+def get(path: str) -> Dict[str, Any]:
+    return _send(path, 'GET', {})
+
+
+def put(path: str, req_data: Dict[str, Any], username: str,
+        password: str) -> None:
     return _send(path, 'PUT', req_data, username, password)

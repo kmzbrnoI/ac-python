@@ -109,7 +109,7 @@ def _process_hello(parsed: List[str]) -> None:
     if events.ev_on_connect is not None:
         try:
             events.ev_on_connect()
-        except:
+        except Exception:
             traceback.print_exc()
     blocks._send_all_registrations()
 

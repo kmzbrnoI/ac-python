@@ -44,7 +44,7 @@ class AC:
         if event is not None:
             try:
                 event(self)
-            except:
+            except Exception:
                 traceback.print_exc()
 
     def done(self) -> None:
