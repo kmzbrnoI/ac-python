@@ -89,7 +89,7 @@ def _process_message(sock: socket.socket, message: str) -> None:
         else:
             send('-;PONG', sock)
     elif len(parsed) >= 4 and parsed[0] == '-' and parsed[1] == 'AC':
-        if parsed[3] == 'CONTROL':
+        if parsed[3] == 'AUTH':
             register.on_register_message(parsed)
 
 

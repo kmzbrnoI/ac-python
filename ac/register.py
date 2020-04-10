@@ -1,4 +1,3 @@
-import base64
 from typing import List
 
 from . import panel_client
@@ -18,8 +17,7 @@ def on_register_message(parsed: List[str]):
         return
 
     if parsed[4] == 'ok':
-        if events.ev_on_register:
-            events.ev_on_register(parsed[2])
+        events.call(events.ev_on_register, parsed[2])
     elif parsed[4] == 'nok':
         # TODO
         pass
