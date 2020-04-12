@@ -57,8 +57,8 @@ class AC:
     def done(self) -> None:
         panel_client.send(f'-;AC;{self.id};CONTROL;DONE')
 
-    def error(self) -> None:  # TODO
-        panel_client.send(f'-;AC;{self.id};CONTROL:ERROR;')
+    def disp_error(self, message: str) -> None:
+        panel_client.send(f'-;AC;{self.id};CONTROL;ERROR;DISPBOTTOM;{message}')
 
     def register(self, password: str) -> None:
         self.password = password

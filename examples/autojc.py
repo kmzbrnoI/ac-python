@@ -76,6 +76,7 @@ def process_jcs(ac_: AC, jcs: List[JC]) -> None:
             logging.info('ok')
             ac.blocks.unregister(jc['useky'])
         else:
+            ac_.disp_error(f'Nelze postavit JC {jc["nazev"]}')
             logging.error(f'Unable to process JC {jc["nazev"]}: ' +
                           str(result['bariery']))
         jc_ids_remaining.remove(str(jc['id']))
