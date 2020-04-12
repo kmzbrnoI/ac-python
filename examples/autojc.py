@@ -17,7 +17,7 @@ AC_ID = '5000'
 
 JC = Dict[str, Any]
 
-JC_IDS: List[int] = [104, 105]
+JC_IDS: List[int] = [1, 5]
 jc_ids_remaining: List[str] = []
 jcs: Dict[str, JC] = {}
 _blocks_state: Dict[str, Dict[str, Any]] = {}
@@ -36,12 +36,16 @@ def get_jcs(ac: AC) -> None:
         jcs[jc_id] = ac.pt_get(f'/jc/{jc_id}?stav=true')['jc']
 
 
-def filter_done_jcs() -> None:
+def filter_done_jcs(ac_: AC) -> None:
     global jc_ids_remaining
     remaining = []
     for jc_id in jc_ids_remaining:
         if not jcs[jc_id]['staveni']['postaveno']:
             remaining.append(jc_id)
+        else:
+            ac_.statestr_add(f'JC {jcs[jc_id]["nazev"]} již postavena,'
+                             ' nestavím.')
+    ac_.statestr_send()
     jc_ids_remaining = remaining
 
 
@@ -73,13 +77,17 @@ def process_jcs(ac_: AC, jcs: List[JC]) -> None:
         logging.info(f'Processing JC {jc["nazev"]}...')
         result = ac_.pt_put(f'/jc/{jc["id"]}/stav', {'ab': True})
         if result['success']:
+            ac_.statestr_add(f'Postavena JC {jc["nazev"]}.')
             logging.info('ok')
             ac.blocks.unregister(jc['useky'])
         else:
+            ac_.statestr_add(f'Nelze postavit JC {jc["nazev"]}.')
             ac_.disp_error(f'Nelze postavit JC {jc["nazev"]}')
             logging.error(f'Unable to process JC {jc["nazev"]}: ' +
                           str(result['bariery']))
+
         jc_ids_remaining.remove(str(jc['id']))
+        ac_.statestr_send()
 
 
 def register_jc_tracks_change(ac_: AC) -> None:
@@ -102,7 +110,7 @@ def _on_start(ac: AC) -> None:
     jc_ids_remaining = list(map(str, JC_IDS))
 
     get_jcs(ac)
-    filter_done_jcs()
+    filter_done_jcs(ac)
     process_free_jcs(ac)
     register_jc_tracks_change(ac)
 
@@ -115,5 +123,5 @@ def _on_block_change(block: ac.Block) -> None:
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     ac.init(HOSTNAME, PORT)

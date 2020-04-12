@@ -30,6 +30,7 @@ class AC:
         self.password = ''
         self.state = State.STOPPED
         self.registered = False
+        self.statestr = ''
 
         self.on_register: Optional[ACEvent] = None
         self.on_unregister: Optional[ACEvent] = None
@@ -67,6 +68,16 @@ class AC:
     def unregister(self) -> None:
         self.password = ''
         panel_client.send(f'-;AC;{self.id};LOGOUT')
+
+    def statestr_send(self) -> None:
+        assert '{' not in self.statestr and '}' not in self.statestr
+        lines = ','.join(['{'+line+'}' for line in self.statestr.split('\n')])
+        lines = '{' + lines + '}'
+        panel_client.send(f'-;AC;{self.id};CONTROL;STATE;{lines}')
+
+    def statestr_add(self, s: str) -> None:
+        assert '{' not in s and '}' not in s
+        self.statestr += s + '\n'
 
     def on_message(self, parsed: List[str]) -> None:
         if parsed[3] == 'AUTH':
