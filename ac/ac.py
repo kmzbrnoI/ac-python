@@ -31,6 +31,7 @@ class AC:
         self.state = State.STOPPED
         self.registered = False
         self.statestr = ''
+        self.fg_color = 0xFFFF00
 
         self.on_register: Optional[ACEvent] = None
         self.on_unregister: Optional[ACEvent] = None
@@ -62,6 +63,7 @@ class AC:
         panel_client.send(f'-;AC;{self.id};CONTROL;ERROR;DISPBOTTOM;{message}')
 
     def register(self, password: str) -> None:
+        self.statestr = ''
         self.password = password
         panel_client.send(f'-;AC;{self.id};LOGIN;{password}')
 
@@ -78,6 +80,11 @@ class AC:
     def statestr_add(self, s: str) -> None:
         assert '{' not in s and '}' not in s
         self.statestr += s + '\n'
+
+    def set_color(self, color: int) -> None:
+        self.color = color
+        hexcolor = hex(color)[2:].zfill(6)
+        panel_client.send(f'-;AC;{self.id};CONTROL;FG-COLOR;{hexcolor}')
 
     def on_message(self, parsed: List[str]) -> None:
         if parsed[3] == 'AUTH':
@@ -101,6 +108,9 @@ class AC:
                 'RESUME': State.RUNNING,
             }
             self.state = remap[parsed[4].upper()]
+
+            if parsed[4].upper() in ['START', 'STOP']:
+                self.fg_color = 0xFFFF00
 
             event = 'on_' + parsed[4].lower()
             if hasattr(self, event):

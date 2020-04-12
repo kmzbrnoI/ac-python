@@ -85,6 +85,7 @@ def process_jcs(ac_: AC, jcs: List[JC]) -> None:
             ac_.disp_error(f'Nelze postavit JC {jc["nazev"]}')
             logging.error(f'Unable to process JC {jc["nazev"]}: ' +
                           str(result['bariery']))
+            ac_.set_color(0xFF0000)
 
         jc_ids_remaining.remove(str(jc['id']))
         ac_.statestr_send()
@@ -102,17 +103,23 @@ def _on_connect() -> None:
 
 
 @ac.on_resume(AC_ID)
+def _on_resume(ac_: ac) -> None:
+    ac_.set_color(0xFFFF00)
+    _on_start(ac_)
+
+
 @ac.on_start(AC_ID)
-def _on_start(ac: AC) -> None:
+def _on_start(ac_: AC) -> None:
     global jc_ids_remaining
 
     logging.info('Start')
     jc_ids_remaining = list(map(str, JC_IDS))
+    ac_.statestr = ''
 
-    get_jcs(ac)
-    filter_done_jcs(ac)
-    process_free_jcs(ac)
-    register_jc_tracks_change(ac)
+    get_jcs(ac_)
+    filter_done_jcs(ac_)
+    process_free_jcs(ac_)
+    register_jc_tracks_change(ac_)
 
 
 @ac.blocks.on_block_change()
@@ -123,5 +130,5 @@ def _on_block_change(block: ac.Block) -> None:
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     ac.init(HOSTNAME, PORT)
