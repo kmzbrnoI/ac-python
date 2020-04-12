@@ -126,7 +126,9 @@ def _on_start(ac_: AC) -> None:
 def _on_block_change(block: ac.Block) -> None:
     global _blocks_state
     _blocks_state[str(block['id'])] = block['blokStav']
-    process_free_jcs(ACs[AC_ID])
+
+    if ACs['5000'].running():
+        process_free_jcs(ACs[AC_ID])
 
 
 if __name__ == '__main__':
