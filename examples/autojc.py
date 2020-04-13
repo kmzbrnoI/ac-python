@@ -17,14 +17,14 @@ Options:
 
 import logging
 from docopt import docopt
+from typing import Any, Dict, List
 
 import ac
 import ac.blocks
 from ac import ACs, AC
-from typing import Any, Dict, List
+import blocks
 
 JC = Dict[str, Any]
-Block = Dict[str, Any]
 
 
 class JCAC(AC):
@@ -97,7 +97,7 @@ def jcs(ids: List[int]) -> Dict[int, JC]:
 def free_jcs(jcs: List[JC]) -> List[JC]:
     result = []
     for jc in jcs:
-        free = all([blocks_state(track_id)['stav'] == 'uvolneno'
+        free = all([blocks.state(track_id)['stav'] == 'uvolneno'
                     for track_id in jc['useky']])
         if free:
             result.append(jc)
@@ -105,28 +105,17 @@ def free_jcs(jcs: List[JC]) -> List[JC]:
     return result
 
 
-@ac.on_connect
-def _on_connect() -> None:
-    for ac_ in ACs.values():
-        ac_.register(ac.password)
-
-
-def blocks_state(id_: int) -> Dict[int, Any]:
-    if id_ not in blocks_state.state:
-        blocks_state.state[id_] = ac.pt.get(f'/blokStav/{id_}')['blokStav']
-    return blocks_state.state[id_]
-
-
-blocks_state.state: Dict[str, Block] = {}
-
-
 @ac.blocks.on_block_change()
 def _on_block_change(block: ac.Block) -> None:
-    blocks_state.state[block['id']] = block['blokStav']
-
     for ac_ in ACs.values():
         if isinstance(ac_, JCAC):
             ac_.process_free_jcs()
+
+
+@ac.on_connect
+def _on_connect() -> None:
+    for ac_ in ACs.values():
+        ac_.register(ac_.password)
 
 
 if __name__ == '__main__':
