@@ -19,29 +19,22 @@ def _on_connect() -> None:
     ac.blocks.register([5, 6, 7])
 
 
-@ac.on_register(AC_ID)
-def _on_register(ac: AC) -> None:
-    logging.info(f'{ac.id}: registered')
+class MyAC(AC):
+    def on_register(self) -> None:
+        logging.info(f'{self.id}: registered')
 
+    def on_start(self) -> None:
+        logging.info(f'{self.id}: start')
+        assert self.state == State.RUNNING
+        assert 'blokStav' in self.pt_put('/blokStav/1', {'blokStav': {}})
 
-@ac.on_resume(AC_ID)
-@ac.on_start(AC_ID)
-def _on_start(ac: AC) -> None:
-    logging.info(f'{ac.id}: start')
-    assert ac.state == State.RUNNING
-    assert 'blokStav' in ac.pt_put('/blokStav/1', {'blokStav': {}})
+    def on_stop(self) -> None:
+        logging.info(f'{self.id}: stop')
+        assert self.state == State.STOPPED
 
-
-@ac.on_stop(AC_ID)
-def _on_stop(ac: AC) -> None:
-    logging.info(f'{ac.id}: stop')
-    assert ac.state == State.STOPPED
-
-
-@ac.on_pause(AC_ID)
-def _on_pause(ac: AC) -> None:
-    logging.info(f'{ac.id}: pause')
-    assert ac.state == State.PAUSED
+    def on_pause(self) -> None:
+        logging.info(f'{self.id}: pause')
+        assert self.state == State.PAUSED
 
 
 @ac.blocks.on_block_change()
@@ -56,4 +49,5 @@ def _on_block_change_(block: ac.Block) -> None:
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
+    ACs[AC_ID] = MyAC(AC_ID)
     ac.init(HOSTNAME, PORT)

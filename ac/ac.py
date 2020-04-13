@@ -1,9 +1,8 @@
 """AC class definition & AC storage definition."""
 
 from enum import Enum
-from typing import Callable, Optional, List, Any, Dict, TypeVar, DefaultDict
+from typing import Callable, List, Any, Dict, TypeVar, DefaultDict
 import logging
-import traceback
 
 from . import panel_client
 from . import pt
@@ -25,20 +24,31 @@ class AC:
     should go throug instance of AC.
     """
 
-    def __init__(self, _id: str) -> None:
-        self.id = _id
+    def __init__(self, id_: str) -> None:
+        self.id = id_
         self.password = ''
         self.state = State.STOPPED
         self.registered = False
         self.statestr = ''
         self.fg_color = 0xFFFF00
 
-        self.on_register: Optional[ACEvent] = None
-        self.on_unregister: Optional[ACEvent] = None
-        self.on_start: Optional[ACEvent] = None
-        self.on_stop: Optional[ACEvent] = None
-        self.on_resume: Optional[ACEvent] = None
-        self.on_pause: Optional[ACEvent] = None
+    def on_register(self) -> None:
+        pass
+
+    def on_unregister(self) -> None:
+        pass
+
+    def on_start(self) -> None:
+        pass
+
+    def on_stop(self) -> None:
+        pass
+
+    def on_resume(self) -> None:
+        pass
+
+    def on_pause(self) -> None:
+        pass
 
     def running(self) -> bool:
         return self.state == State.RUNNING
@@ -48,13 +58,6 @@ class AC:
 
     def stopped(self) -> bool:
         return self.state == State.STOPPED
-
-    def call(self, event: Optional[ACEvent]) -> None:
-        if event is not None:
-            try:
-                event(self)
-            except Exception:
-                traceback.print_exc()
 
     def done(self) -> None:
         panel_client.send(f'-;AC;{self.id};CONTROL;DONE')
@@ -91,13 +94,13 @@ class AC:
             assert len(parsed) >= 5
             if parsed[4] == 'ok':
                 self.registered = True
-                self.call(self.on_register)
+                self.on_register()
             elif parsed[4] == 'nok':  # TODO
                 self.registered = False
                 logging.error(f'Registration error {parsed[5]}: {parsed[6]}')
             elif parsed[4] == 'logout':
                 self.registered = False
-                self.call(self.on_unregister)
+                self.on_unregister()
 
         elif parsed[3] == 'CONTROL':
             assert len(parsed) >= 5
@@ -114,7 +117,7 @@ class AC:
 
             event = 'on_' + parsed[4].lower()
             if hasattr(self, event):
-                self.call(getattr(self, event))
+                getattr(self, event)()
 
     def pt_get(self, path: str) -> Dict[str, Any]:
         return pt.get(path)

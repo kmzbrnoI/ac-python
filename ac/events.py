@@ -2,11 +2,12 @@
 register events. See examples below."""
 
 from typing import Callable
-from .ac import ACs, AC
+from .ac import AC
 
 ACEvent = Callable[[AC], None]
 ACDecorator = Callable[[ACEvent], ACEvent]
 ev_on_connect = None
+ev_on_disconnect = None
 
 
 def on_connect(func: Callable[[], None]) -> Callable[[], None]:
@@ -15,49 +16,7 @@ def on_connect(func: Callable[[], None]) -> Callable[[], None]:
     return func
 
 
-def on_register(id_: str) -> ACDecorator:
-    def decorate(function: ACEvent) -> ACEvent:
-        ACs[id_].on_register = function
-        return function
-
-    return decorate
-
-
-def on_unregister(id_: str) -> ACDecorator:
-    def decorate(function: ACEvent) -> ACEvent:
-        ACs[id_].on_unregister = function
-        return function
-
-    return decorate
-
-
-def on_start(id_: str) -> ACDecorator:
-    def decorate(function: ACEvent) -> ACEvent:
-        ACs[id_].on_start = function
-        return function
-
-    return decorate
-
-
-def on_stop(id_: str) -> ACDecorator:
-    def decorate(function: ACEvent) -> ACEvent:
-        ACs[id_].on_stop = function
-        return function
-
-    return decorate
-
-
-def on_resume(id_: str) -> ACDecorator:
-    def decorate(function: ACEvent) -> ACEvent:
-        ACs[id_].on_resume = function
-        return function
-
-    return decorate
-
-
-def on_pause(id_: str) -> ACDecorator:
-    def decorate(function: ACEvent) -> ACEvent:
-        ACs[id_].on_pause = function
-        return function
-
-    return decorate
+def on_disconnect(func: Callable[[], None]) -> Callable[[], None]:
+    global ev_on_disconnect
+    ev_on_disconnect = func
+    return func
