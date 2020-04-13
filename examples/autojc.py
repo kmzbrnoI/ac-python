@@ -10,7 +10,6 @@ from ac import ACs, AC
 from typing import Any, Dict, List
 
 PORT = 5896
-AC_ID = '5000'
 JC = Dict[str, Any]
 Block = Dict[str, Any]
 
@@ -112,8 +111,9 @@ blocks_state.state: Dict[str, Block] = {}
 def _on_block_change(block: ac.Block) -> None:
     blocks_state.state[block['id']] = block['blokStav']
 
-    if ACs[AC_ID].running():
-        ACs[AC_ID].process_free_jcs()
+    for ac in ACs.values():
+        if isinstance(ac, JCAC):
+            ac.process_free_jcs()
 
 
 if __name__ == '__main__':
@@ -123,5 +123,5 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.DEBUG)
     to_process = [1, 5]
-    ACs[AC_ID] = JCAC(AC_ID, sys.argv[3], to_process)
+    ACs[sys.argv[2]] = JCAC(sys.argv[2], sys.argv[3], to_process)
     ac.init(sys.argv[1], PORT)
