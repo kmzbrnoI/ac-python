@@ -78,10 +78,7 @@ class JCAC(AC):
 
 
 def jcs(ids: List[int]) -> Dict[int, JC]:
-    result: Dict[int, JC] = {}
-    for jc_id in ids:
-        result[jc_id] = ac.pt.get(f'/jc/{jc_id}?stav=true')['jc']
-    return result
+    return {jc_id: ac.pt.get(f'/jc/{jc_id}?stav=true')['jc'] for jc_id in ids}
 
 
 def free_jcs(jcs: List[JC]) -> List[JC]:
