@@ -21,8 +21,9 @@ class JCAC(AC):
     are free.
     """
 
-    def __init__(self, id_: str, to_process: List[int]) -> None:
+    def __init__(self, id_: str, password: str, to_process: List[int]) -> None:
         AC.__init__(self, id_)
+        self.password = password
         self.to_process = to_process
         self.jcs_remaining: Dict[int, JC] = {}
 
@@ -94,7 +95,8 @@ def free_jcs(jcs: List[JC]) -> List[JC]:
 
 @ac.on_connect
 def _on_connect() -> None:
-    ACs[AC_ID].register('loskarlos')
+    for ac in ACs.values():
+        ac.register(ac.password)
 
 
 def blocks_state(id_: int) -> Dict[int, Any]:
@@ -115,11 +117,11 @@ def _on_block_change(block: ac.Block) -> None:
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        sys.stderr.write('Usage: autojc.py <hostname>\n')
+    if len(sys.argv) < 4:
+        sys.stderr.write('Usage: autojc.py <hostname> <block id> <password>\n')
         sys.exit(1)
 
     logging.basicConfig(level=logging.DEBUG)
     to_process = [1, 5]
-    ACs[AC_ID] = JCAC(AC_ID, to_process)
+    ACs[AC_ID] = JCAC(AC_ID, sys.argv[3], to_process)
     ac.init(sys.argv[1], PORT)
