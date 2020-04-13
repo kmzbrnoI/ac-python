@@ -4,15 +4,17 @@
 Automatically process predefined JCs.
 
 Usage:
-  autojc.py <block-id> <password> [-s <servername>] [-p <port>]
+  autojc.py [options] <block-id> <password> JCS ...
   autojc.py --version
 
 Options:
+  -s <servername>    Specify hJOPserver address [default: localhost]
+  -p <port>          Specify hJOPserver port [default: 5896]
+  -l <loglevel>      Specify loglevel (python logging package) [default: info]
   -h --help          Show this screen.
   --version          Show version.
 """
 
-import sys
 import logging
 from docopt import docopt
 
@@ -105,8 +107,8 @@ def free_jcs(jcs: List[JC]) -> List[JC]:
 
 @ac.on_connect
 def _on_connect() -> None:
-    for ac in ACs.values():
-        ac.register(ac.password)
+    for ac_ in ACs.values():
+        ac_.register(ac.password)
 
 
 def blocks_state(id_: int) -> Dict[int, Any]:
@@ -122,17 +124,25 @@ blocks_state.state: Dict[str, Block] = {}
 def _on_block_change(block: ac.Block) -> None:
     blocks_state.state[block['id']] = block['blokStav']
 
-    for ac in ACs.values():
-        if isinstance(ac, JCAC):
-            ac.process_free_jcs()
+    for ac_ in ACs.values():
+        if isinstance(ac_, JCAC):
+            ac_.process_free_jcs()
 
 
 if __name__ == '__main__':
-    args = docopt(__doc__, version='0.0.1')
-    server = args['<servername>'] if args['-s'] else 'localhost'
-    port = args['<port>'] if args['-p'] else 5896
+    args = docopt(__doc__)
 
-    logging.basicConfig(level=logging.DEBUG)
-    to_process = [1, 5]
-    ACs[sys.argv[2]] = JCAC(args['<block-id>'], args['<password>'], to_process)
-    ac.init(server, port)
+    loglevel = {
+        'debug': logging.DEBUG,
+        'info': logging.INFO,
+        'warning': logging.WARNING,
+        'error': logging.ERROR,
+        'critical': logging.CRITICAL,
+    }.get(args['-l'], logging.INFO)
+
+    logging.basicConfig(level=loglevel)
+    jcs_ = map(int, args['JCS'])
+    ACs[args['<block-id>']] = JCAC(
+        args['<block-id>'], args['<password>'], jcs_
+    )
+    ac.init(args['-s'], int(args['-p']))
