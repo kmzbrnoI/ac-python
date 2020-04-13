@@ -2,16 +2,15 @@
 
 """Automatically process predefined JCs."""
 
+import sys
 import logging
 import ac
 import ac.blocks
 from ac import ACs, AC
 from typing import Any, Dict, List
 
-HOSTNAME = '192.168.0.168'
 PORT = 5896
 AC_ID = '5000'
-
 JC = Dict[str, Any]
 
 
@@ -115,7 +114,11 @@ def _on_block_change(block: ac.Block) -> None:
 
 
 if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        sys.stderr.write('Usage: autojc.py <hostname>\n')
+        sys.exit(1)
+
     logging.basicConfig(level=logging.DEBUG)
     to_process = [1, 5]
     ACs[AC_ID] = JCAC(AC_ID, to_process)
-    ac.init(HOSTNAME, PORT)
+    ac.init(sys.argv[1], PORT)
