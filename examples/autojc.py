@@ -12,6 +12,7 @@ from typing import Any, Dict, List
 PORT = 5896
 AC_ID = '5000'
 JC = Dict[str, Any]
+Block = Dict[str, Any]
 
 
 class JCAC(AC):
@@ -102,7 +103,7 @@ def blocks_state(id_: int) -> Dict[int, Any]:
     return blocks_state.state[id_]
 
 
-blocks_state.state = {}
+blocks_state.state: Dict[str, Block] = {}
 
 
 @ac.blocks.on_block_change()
