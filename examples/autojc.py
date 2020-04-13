@@ -1,15 +1,26 @@
 #!/usr/bin/env python3
 
-"""Automatically process predefined JCs."""
+"""
+Automatically process predefined JCs.
+
+Usage:
+  autojc.py <block-id> <password> [-s <servername>] [-p <port>]
+  autojc.py --version
+
+Options:
+  -h --help          Show this screen.
+  --version          Show version.
+"""
 
 import sys
 import logging
+from docopt import docopt
+
 import ac
 import ac.blocks
 from ac import ACs, AC
 from typing import Any, Dict, List
 
-PORT = 5896
 JC = Dict[str, Any]
 Block = Dict[str, Any]
 
@@ -117,11 +128,11 @@ def _on_block_change(block: ac.Block) -> None:
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
-        sys.stderr.write('Usage: autojc.py <hostname> <block id> <password>\n')
-        sys.exit(1)
+    args = docopt(__doc__, version='0.0.1')
+    server = args['<servername>'] if args['-s'] else 'localhost'
+    port = args['<port>'] if args['-p'] else 5896
 
     logging.basicConfig(level=logging.DEBUG)
     to_process = [1, 5]
-    ACs[sys.argv[2]] = JCAC(sys.argv[2], sys.argv[3], to_process)
-    ac.init(sys.argv[1], PORT)
+    ACs[sys.argv[2]] = JCAC(args['<block-id>'], args['<password>'], to_process)
+    ac.init(server, port)
