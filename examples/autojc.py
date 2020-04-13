@@ -141,7 +141,7 @@ if __name__ == '__main__':
     }.get(args['-l'], logging.INFO)
 
     logging.basicConfig(level=loglevel)
-    jcs_ = map(int, args['JCS'])
+    jcs_ = list(map(int, args['JCS']))
     ACs[args['<block-id>']] = JCAC(
         args['<block-id>'], args['<password>'], jcs_
     )
