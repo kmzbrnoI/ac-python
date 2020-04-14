@@ -18,6 +18,7 @@ Options:
 import logging
 from docopt import docopt
 from typing import Any, Dict, Optional
+import datetime
 
 import ac
 import ac.blocks
@@ -55,6 +56,7 @@ class DanceAC(AC):
     def step_done(self) -> None:
         logging.info(f'Step {self.step} done, going to step {self.step+1}...')
         self.step += 1
+        self.on_update()
 
 
 class Step:
@@ -74,13 +76,19 @@ class StepJC(Step):
         assert isinstance(acn, DanceAC)
         if self.jc is None:
             self.jc = self.get_jc(self.name)  # TODO: check it exists on start
+
+        if self.jc['staveni']['postaveno']:
+            acn.step_done()
+            return
+
         result = acn.pt_put(f'/jc/{self.jc["id"]}/stav', {})
         if result['success']:
+            self.jc['staveni']['postaveno'] = True
             acn.step_done()
 
     def get_jc(self, name: str) -> JC:
         if not StepJC.name_to_jc:
-            jcs = ac.pt.get('/jc/')['jc']
+            jcs = ac.pt.get('/jc?stav=true')['jc']
             StepJC.name_to_jc = {
                 jc['nazev']: jc
                 for jc in jcs if jc['typ'] == self.type
@@ -88,8 +96,23 @@ class StepJC(Step):
         return StepJC.name_to_jc[name]
 
 
+class StepDelay(Step):
+    def __init__(self, delay: datetime.timedelta) -> None:
+        self.delay = delay
+        self.finish: Optional[datetime.datetime] = None
+
+    def update(self, acn: AC) -> None:
+        assert isinstance(acn, DanceAC)
+        if self.finish is None:
+            self.finish = datetime.datetime.now() + self.delay
+        if datetime.datetime.now() > self.finish:
+            self.finish = None
+            acn.step_done()
+
+
 STEPS: Dict[int, Step] = {
     1: StepJC('Klb S1 > Klb PriblL'),
+    2: StepDelay(datetime.timedelta(seconds=5)),
     #    2: 'jc(Klb S1 > Klb PriblL, wait_for_pass=True)',
     #    5: 'delay(10s)',
     #    6: 'usek("klb K1", "obsaz")'
