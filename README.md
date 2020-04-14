@@ -20,6 +20,7 @@ See `tests/basic.py` or `examples` for examples of using.
    contain also other utils. Utils are indended for importing in other projects.
  * `examples`: examples of using `ac` library, not intended to import from
    other projects.
+   - Use `examples/template.py` for creating your own AC.
  * `test`: tests of AC library.
 
 ## Authors
