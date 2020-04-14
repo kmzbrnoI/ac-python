@@ -125,6 +125,7 @@ class DanceAC(AC):
         self.on_update()
 
     def on_update(self) -> None:
+        AC.on_update(self)
         if not self.running():
             return
 

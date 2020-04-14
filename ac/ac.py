@@ -51,7 +51,8 @@ class AC:
         pass
 
     def on_update(self) -> None:
-        pass
+        if not self.registered:
+            self.register(self.password)
 
     def on_connect(self) -> None:
         self.register(self.password)
