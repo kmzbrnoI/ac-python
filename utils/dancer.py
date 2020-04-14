@@ -40,7 +40,7 @@ class StepJC(Step):
 
         result = acn.pt_put(f'/jc/{self.jc["id"]}/stav', {})
         if result['success']:
-            self.jc['staveni']['postaveno'] = True
+            self.jc = None
             acn.step_done()
 
     def get_jc(self, name: str) -> JC:
@@ -120,6 +120,7 @@ class DanceAC(AC):
         logging.info('Start')
         self.statestr = ''
         self.stepi = 1
+        self.on_update()
 
     def on_resume(self) -> None:
         self.set_color(0xFFFF00)
