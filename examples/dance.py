@@ -17,7 +17,7 @@ Options:
 
 import logging
 from docopt import docopt
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Callable
 import datetime
 
 import ac
@@ -57,6 +57,10 @@ class DanceAC(AC):
         logging.info(f'Step {self.step} done, going to step {self.step+1}...')
         self.step += 1
         self.on_update()
+
+    def on_block_change(self, block: ac.Block) -> None:
+        if self.running() and isinstance(STEPS[self.step], StepWaitForBlock):
+            STEPS[self.step].on_block_change(self, block)
 
 
 class Step:
@@ -110,13 +114,56 @@ class StepDelay(Step):
             acn.step_done()
 
 
+class StepWaitForBlock(Step):
+    name_to_id: Dict[str, int] = {}
+
+    def __init__(self, name: str, checker: Callable[[ac.Block], bool]) -> None:
+        self.name = name
+        self.checker = checker
+        self.block: Optional[ac.Block] = None
+
+    def update(self, acn: AC) -> None:
+        assert isinstance(acn, DanceAC)
+        if self.block is None:
+            blockid = self.get_block_id(self.name)
+            self.block = ac.pt.get(f'/bloky/{blockid}?stav=true')['blok']
+            if self.checker(self.block):
+                self.block = None
+                acn.step_done()
+            else:
+                ac.blocks.register([self.block['id']])
+
+    def on_block_change(self, acn: AC, block: ac.Block) -> None:
+        assert isinstance(acn, DanceAC)
+        if self.block is None or block['id'] != self.block['id']:
+            return
+        if self.checker(block):
+            ac.blocks.unregister([self.block['id']])
+            self.block = None
+            acn.step_done()
+
+    def get_block_id(self, name: str) -> int:
+        if not StepWaitForBlock.name_to_id:
+            blocks = ac.pt.get('/bloky?stav=true')['bloky']
+            StepWaitForBlock.name_to_id = {
+                block['nazev']: block['id'] for block in blocks
+            }
+        return StepWaitForBlock.name_to_id[name]
+
+
 STEPS: Dict[int, Step] = {
     1: StepJC('Klb S1 > Klb PriblL'),
-    2: StepDelay(datetime.timedelta(seconds=5)),
-    #    2: 'jc(Klb S1 > Klb PriblL, wait_for_pass=True)',
-    #    5: 'delay(10s)',
-    #    6: 'usek("klb K1", "obsaz")'
+    2: StepWaitForBlock('Klb K1',
+                        lambda block: block['blokStav']['stav'] == 'obsazeno'),
+    3: StepDelay(datetime.timedelta(seconds=5)),
 }
+
+
+@ac.blocks.on_block_change()
+def _on_block_change(block: ac.Block) -> None:
+    for acn in ACs.values():
+        if isinstance(acn, DanceAC):
+            acn.on_block_change(block)
 
 
 if __name__ == '__main__':
