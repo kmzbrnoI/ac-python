@@ -16,18 +16,18 @@ Options:
 """
 
 import logging
-from docopt import docopt
+from docopt import docopt  # type: ignore
 from typing import Dict
 import datetime
 
 import ac
 from ac import ACs
-from utils.dancer import Step, StepJC, StepWaitForBlock, StepDelay, DanceAC
+from utils.dancer import Step, StepJC, StepWaitForBlock, StepDelay, DanceAC, \
+        track_is_occupied
 
 STEPS: Dict[int, Step] = {
     1: StepJC('Klb S1 > Klb PriblL'),
-    2: StepWaitForBlock('Klb K1',
-                        lambda block: block['blokStav']['stav'] == 'obsazeno'),
+    2: StepWaitForBlock('Klb K1', track_is_occupied),
     3: StepDelay(datetime.timedelta(seconds=5)),
 }
 

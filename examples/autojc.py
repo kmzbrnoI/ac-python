@@ -16,7 +16,7 @@ Options:
 """
 
 import logging
-from docopt import docopt
+from docopt import docopt  # type: ignore
 from typing import Any, Dict, List
 
 import ac

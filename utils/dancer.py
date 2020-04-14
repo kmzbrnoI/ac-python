@@ -109,6 +109,10 @@ class StepWaitForBlock(Step):
         return StepWaitForBlock.name_to_id[name]
 
 
+def track_is_occupied(block: ac.Block) -> bool:
+    return bool(block['blokStav']['stav'] == 'obsazeno')
+
+
 class DanceAC(AC):
     """This AC executes predefined steps."""
 
