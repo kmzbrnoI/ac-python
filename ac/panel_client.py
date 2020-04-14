@@ -52,7 +52,7 @@ def _listen(sock: socket.socket) -> None:
                 for ac_ in ACs.values():
                     try:
                         ac_.on_update()
-                    except Exception as e:
+                    except Exception:
                         traceback.print_exc()
                 events.call(events.evs_on_update)
 
@@ -135,7 +135,7 @@ def _process_hello(parsed: List[str]) -> None:
     for ac_ in ACs.values():
         try:
             ac_.on_connect()
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
     events.call(events.evs_on_connect)
     blocks._send_all_registrations()
@@ -182,7 +182,7 @@ def init(server: str, port: int) -> None:
             for ac_ in ACs.values():
                 try:
                     ac_.on_disconnect()
-                except Exception as e:
+                except Exception:
                     traceback.print_exc()
             events.call(events.evs_on_disconnect)
         time.sleep(1)
