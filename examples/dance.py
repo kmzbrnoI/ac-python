@@ -8,7 +8,7 @@ Usage:
   dance.py --version
 
 Options:
-  -s <servername>    Specify hJOPserver address [default: localhost]
+  -s <servername>    Specify hJOPserver address [default: 127.0.0.1]
   -p <port>          Specify hJOPserver port [default: 5896]
   -l <loglevel>      Specify loglevel (python logging package) [default: info]
   -h --help          Show this screen.
