@@ -37,7 +37,7 @@ def _listen(sock: socket.socket) -> None:
     try:
         while True:
             readable, writable, exceptional = select.select(
-                [sock], [], [sock], UPDATE_PERIOD
+                [sock], [sock], [sock], UPDATE_PERIOD
             )
 
             if sock in exceptional:
@@ -138,8 +138,13 @@ def _process_hello(parsed: List[str]) -> None:
 def _connect(server: str, port: int) -> socket.socket:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(SOCKET_TIMEOUT)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+    sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPIDLE, 1)
+    sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 1)
+    sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 5)
     sock.connect((server, port))
     sock.setblocking(False)
+
     return sock
 
 
@@ -150,9 +155,11 @@ def init(server: str, port: int) -> None:
     pt.server = server
 
     while True:
+        connected = False
         try:
             logging.info(f'Initializing connection to {server}:{port}...')
             sock = _connect(server, port)
+            connected = True
             logging.info('Socket opened')
             panel_socket = sock
             send('-;HELLO;{0}'.format(CLIENT_PROTOCOL_VERSION), sock)
@@ -161,8 +168,12 @@ def init(server: str, port: int) -> None:
             logging.info('Disconnected from server')
         except socket.timeout:
             logging.info('Unable to connect to server')
+        except OSError as e:
+            logging.info(e)
+            time.sleep(9)
 
-        for ac_ in ACs.values():
-            ac_.on_disconnect()
-        events.call(events.evs_on_disconnect)
+        if connected:
+            for ac_ in ACs.values():
+                ac_.on_disconnect()
+            events.call(events.evs_on_disconnect)
         time.sleep(1)
