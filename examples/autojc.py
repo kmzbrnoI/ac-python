@@ -22,7 +22,7 @@ from typing import Any, Dict, List
 import ac
 import ac.blocks
 from ac import ACs, AC
-import blocks
+import utils.blocks
 
 JC = Dict[str, Any]
 
@@ -96,7 +96,7 @@ def jcs(ids: List[int]) -> Dict[int, JC]:
 def free_jcs(jcs: List[JC]) -> List[JC]:
     result = []
     for jc in jcs:
-        free = all([blocks.state(track_id)['stav'] == 'uvolneno'
+        free = all([utils.blocks.state(track_id)['stav'] == 'uvolneno'
                     for track_id in jc['useky']])
         if free:
             result.append(jc)

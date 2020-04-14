@@ -22,7 +22,7 @@ import datetime
 
 import ac
 from ac import ACs
-from dancer import Step, StepJC, StepWaitForBlock, StepDelay, DanceAC
+from utils.dancer import Step, StepJC, StepWaitForBlock, StepDelay, DanceAC
 
 STEPS: Dict[int, Step] = {
     1: StepJC('Klb S1 > Klb PriblL'),
