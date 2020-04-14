@@ -22,7 +22,7 @@ class StepJC(Step):
     """
     Process jc 'name'. If processed already, skip processing and continue.
     """
-    name_to_id: Dict[str, JC] = {}
+    name_to_id: Dict[str, int] = {}
 
     def __init__(self, name: str, type_: str = 'VC') -> None:
         self.jc: Optional[JC] = None
@@ -144,7 +144,7 @@ class DanceAC(AC):
     def on_block_change(self, block: ac.Block) -> None:
         if (self.running() and
                 isinstance(self.steps[self.stepi], StepWaitForBlock)):
-            self.steps[self.stepi].on_block_change(self, block)
+            self.steps[self.stepi].on_block_change(self, block)  # type: ignore
 
 
 @ac.blocks.on_block_change()
