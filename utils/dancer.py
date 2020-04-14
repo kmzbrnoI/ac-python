@@ -22,7 +22,7 @@ class StepJC(Step):
     """
     Process jc 'name'. If processed already, skip processing and continue.
     """
-    name_to_jc: Dict[str, JC] = {}
+    name_to_id: Dict[str, JC] = {}
 
     def __init__(self, name: str, type_: str = 'VC') -> None:
         self.jc: Optional[JC] = None
@@ -32,9 +32,11 @@ class StepJC(Step):
     def update(self, acn: AC) -> None:
         assert isinstance(acn, DanceAC)
         if self.jc is None:
-            self.jc = self.get_jc(self.name)  # TODO: check it exists on start
+            jcid = self.get_jc_id(self.name)  # TODO: check it exists on start
+            self.jc = ac.pt.get(f'/jc/{jcid}?stav=true')['jc']
 
         if self.jc['staveni']['postaveno']:
+            self.jc = None
             acn.step_done()
             return
 
@@ -43,14 +45,14 @@ class StepJC(Step):
             self.jc = None
             acn.step_done()
 
-    def get_jc(self, name: str) -> JC:
-        if not StepJC.name_to_jc:
-            jcs = ac.pt.get('/jc?stav=true')['jc']
-            StepJC.name_to_jc = {
-                jc['nazev']: jc
+    def get_jc_id(self, name: str) -> int:
+        if not StepJC.name_to_id:
+            jcs = ac.pt.get('/jc')['jc']
+            StepJC.name_to_id = {
+                jc['nazev']: jc['id']
                 for jc in jcs if jc['typ'] == self.type
             }
-        return StepJC.name_to_jc[name]
+        return StepJC.name_to_id[name]
 
 
 class StepDelay(Step):
@@ -121,10 +123,6 @@ class DanceAC(AC):
         self.statestr = ''
         self.stepi = 1
         self.on_update()
-
-    def on_resume(self) -> None:
-        self.set_color(0xFFFF00)
-        self.on_start()
 
     def on_update(self) -> None:
         if not self.running():
