@@ -102,7 +102,7 @@ class StepWaitForBlock(Step):
 
     def get_block_id(self, name: str) -> int:
         if not StepWaitForBlock.name_to_id:
-            blocks = ac.pt.get('/bloky?stav=true')['bloky']
+            blocks = ac.pt.get('/bloky')['bloky']
             StepWaitForBlock.name_to_id = {
                 block['nazev']: block['id'] for block in blocks
             }
