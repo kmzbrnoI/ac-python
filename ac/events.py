@@ -1,22 +1,32 @@
 """Package event definitions. This file implements decorators to easily
 register events. See examples below."""
 
-from typing import Callable
-from .ac import AC
+import traceback
+from typing import Callable, List
 
-ACEvent = Callable[[AC], None]
-ACDecorator = Callable[[ACEvent], ACEvent]
-ev_on_connect = None
-ev_on_disconnect = None
+evs_on_connect: List[Callable[[], None]] = []
+evs_on_disconnect: List[Callable[[], None]] = []
+evs_on_update: List[Callable[[], None]] = []
 
 
 def on_connect(func: Callable[[], None]) -> Callable[[], None]:
-    global ev_on_connect
-    ev_on_connect = func
+    evs_on_connect.append(func)
     return func
 
 
 def on_disconnect(func: Callable[[], None]) -> Callable[[], None]:
-    global ev_on_disconnect
-    ev_on_disconnect = func
+    evs_on_disconnect.append(func)
     return func
+
+
+def on_update(func: Callable[[], None]) -> Callable[[], None]:
+    evs_on_update.append(func)
+    return func
+
+
+def call(events: List[Callable[[], None]]) -> None:
+    for event in events:
+        try:
+            event()
+        except Exception:
+            traceback.print_exc()

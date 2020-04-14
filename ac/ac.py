@@ -24,9 +24,9 @@ class AC:
     should go throug instance of AC.
     """
 
-    def __init__(self, id_: str) -> None:
+    def __init__(self, id_: str, password: str = '') -> None:
         self.id = id_
-        self.password = ''
+        self.password = password
         self.state = State.STOPPED
         self.registered = False
         self.statestr = ''
@@ -48,6 +48,15 @@ class AC:
         pass
 
     def on_pause(self) -> None:
+        pass
+
+    def on_update(self) -> None:
+        pass
+
+    def on_connect(self) -> None:
+        self.register(self.password)
+
+    def on_disconnect(self) -> None:
         pass
 
     def running(self) -> bool:

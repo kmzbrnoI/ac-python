@@ -34,8 +34,7 @@ class JCAC(AC):
     """
 
     def __init__(self, id_: str, password: str, to_process: List[int]) -> None:
-        AC.__init__(self, id_)
-        self.password = password
+        AC.__init__(self, id_, password)
         self.to_process = to_process
         self.jcs_remaining: Dict[int, JC] = {}
 
@@ -110,12 +109,6 @@ def _on_block_change(block: ac.Block) -> None:
     for ac_ in ACs.values():
         if isinstance(ac_, JCAC):
             ac_.process_free_jcs()
-
-
-@ac.on_connect
-def _on_connect() -> None:
-    for ac_ in ACs.values():
-        ac_.register(ac_.password)
 
 
 if __name__ == '__main__':

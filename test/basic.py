@@ -36,6 +36,9 @@ class MyAC(AC):
         logging.info(f'{self.id}: pause')
         assert self.state == State.PAUSED
 
+    def on_update(self) -> None:
+        print('Update')
+
 
 @ac.blocks.on_block_change()
 def _on_block_change(block: ac.Block) -> None:

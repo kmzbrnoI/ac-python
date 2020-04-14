@@ -6,6 +6,8 @@ import logging
 from typing import Optional, List
 import traceback
 import time
+import select
+import datetime
 
 from . import message_parser
 from . import events
@@ -14,6 +16,8 @@ from . import blocks
 from . import pt
 
 CLIENT_PROTOCOL_VERSION = '1.1'
+SOCKET_TIMEOUT = 10  # seconds
+UPDATE_PERIOD = 1  # seconds
 
 panel_socket: Optional[socket.socket] = None
 
@@ -27,39 +31,55 @@ class OutdatedVersionError(Exception):
 
 
 def _listen(sock: socket.socket) -> None:
-    previous = ''
+    next_update = datetime.datetime.now() + \
+                  datetime.timedelta(seconds=UPDATE_PERIOD)
 
     try:
-        while sock:
-            data = sock.recv(2048)
-            if not data:
-                raise DisconnectedError('Disconnected from server!')
+        while True:
+            readable, writable, exceptional = select.select(
+                [sock], [], [sock], UPDATE_PERIOD
+            )
 
-            recv = previous + data.decode('utf-8').replace('\r', '')
-            previous = ''
+            if sock in exceptional:
+                raise DisconnectedError('Socket exception!')
 
-            if '\n' not in recv:
-                previous = recv
-                continue
+            if sock in readable:
+                _handle_ready_read(sock)
 
-            q = deque(recv.splitlines(keepends=True))
-
-            while q:
-                item = q.popleft()
-                logging.debug('> {0}'.format(item.strip()))
-
-                if item.endswith('\n'):
-                    try:
-                        _process_message(sock, item.strip())
-                    except Exception as e:
-                        logging.warning('Message processing error: '
-                                        '{0}!'.format(str(e)))
-                        traceback.print_exc()
-                else:
-                    previous = item
+            if datetime.datetime.now() > next_update:
+                next_update = datetime.datetime.now() + \
+                              datetime.timedelta(seconds=UPDATE_PERIOD)
+                for ac_ in ACs.values():
+                    ac_.on_update()
+                events.call(events.evs_on_update)
 
     except Exception as e:
         logging.error('Connection error: {0}'.format(e))
+
+
+def _handle_ready_read(sock: socket.socket) -> None:
+    data = sock.recv(2048)
+    if not data:
+        raise DisconnectedError('Disconnected from server!')
+
+    recv = data.decode('utf-8').replace('\r', '')
+
+    if '\n' not in recv:
+        return
+
+    q = deque(recv.splitlines(keepends=True))
+
+    while q:
+        item = q.popleft()
+        logging.debug('> {0}'.format(item.strip()))
+
+        if item.endswith('\n'):
+            try:
+                _process_message(sock, item.strip())
+            except Exception as e:
+                logging.warning('Message processing error: '
+                                '{0}!'.format(str(e)))
+                traceback.print_exc()
 
 
 def send(message: str, sock: Optional[socket.socket] = None) -> None:
@@ -109,18 +129,17 @@ def _process_hello(parsed: List[str]) -> None:
         raise OutdatedVersionError('Outdated version of server protocol: '
                                    '{0}!'.format(version))
 
-    if events.ev_on_connect is not None:
-        try:
-            events.ev_on_connect()
-        except Exception:
-            traceback.print_exc()
+    for ac_ in ACs.values():
+        ac_.on_connect()
+    events.call(events.evs_on_connect)
     blocks._send_all_registrations()
 
 
 def _connect(server: str, port: int) -> socket.socket:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(10)
+    sock.settimeout(SOCKET_TIMEOUT)
     sock.connect((server, port))
+    sock.setblocking(False)
     return sock
 
 
@@ -143,4 +162,7 @@ def init(server: str, port: int) -> None:
         except socket.timeout:
             logging.info('Unable to connect to server')
 
+        for ac_ in ACs.values():
+            ac_.on_disconnect()
+        events.call(events.evs_on_disconnect)
         time.sleep(1)
