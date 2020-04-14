@@ -7,6 +7,7 @@ import urllib.request
 import json
 from typing import Dict, Any
 import base64
+import logging
 
 server = ''
 PORT = 5823
@@ -34,9 +35,11 @@ def _send(path: str, method: str, req_data: Dict[str, Any],
 
 
 def get(path: str) -> Dict[str, Any]:
+    logging.debug(f'PT GET {path}')
     return _send(path, 'GET', {})
 
 
 def put(path: str, req_data: Dict[str, Any], username: str,
         password: str) -> Dict[str, Any]:
+    logging.debug(f'PT PUT {path}')
     return _send(path, 'PUT', req_data, username, password)
