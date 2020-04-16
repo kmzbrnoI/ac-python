@@ -11,11 +11,22 @@ from ac import ACs, AC
 JC = Dict[str, Any]
 
 
+class DanceStartException(Exception):
+    pass
+
+
 class Step:
     """Base class for all specific dance steps."""
 
     def update(self, acn: AC) -> None:
         pass
+
+    def on_start(self, acn: AC) -> None:
+        pass
+
+
+class JCNotFoundException(DanceStartException):
+    pass
 
 
 class StepJC(Step):
@@ -32,7 +43,7 @@ class StepJC(Step):
     def update(self, acn: AC) -> None:
         assert isinstance(acn, DanceAC)
         if self.jc is None:
-            jcid = self.get_jc_id(self.name)  # TODO: check it exists on start
+            jcid = self.get_jc_id(self.name)
             self.jc = ac.pt.get(f'/jc/{jcid}?stav=true')['jc']
 
         if self.jc['staveni']['postaveno']:
@@ -45,6 +56,9 @@ class StepJC(Step):
             self.jc = None
             acn.step_done()
 
+    def on_start(self, acn: AC) -> None:
+        self.get_jc_id(self.name)
+
     def get_jc_id(self, name: str) -> int:
         if not StepJC.name_to_id:
             jcs = ac.pt.get('/jc')['jc']
@@ -52,6 +66,8 @@ class StepJC(Step):
                 jc['nazev']: jc['id']
                 for jc in jcs if jc['typ'] == self.type
             }
+        if name not in StepJC.name_to_id.keys():
+            raise JCNotFoundException(f"Jízdní cesta {self.name} neexistuje!")
         return StepJC.name_to_id[name]
 
 
@@ -69,6 +85,10 @@ class StepDelay(Step):
         if datetime.datetime.now() > self.finish:
             self.finish = None
             acn.step_done()
+
+
+class BlockNotFoundException(DanceStartException):
+    pass
 
 
 class StepWaitForBlock(Step):
@@ -91,6 +111,9 @@ class StepWaitForBlock(Step):
             else:
                 ac.blocks.register([self.block['id']])
 
+    def on_start(self, acn: AC) -> None:
+        self.get_block_id(self.name)
+
     def on_block_change(self, acn: AC, block: ac.Block) -> None:
         assert isinstance(acn, DanceAC)
         if self.block is None or block['id'] != self.block['id']:
@@ -106,6 +129,8 @@ class StepWaitForBlock(Step):
             StepWaitForBlock.name_to_id = {
                 block['nazev']: block['id'] for block in blocks
             }
+        if name not in StepWaitForBlock.name_to_id.keys():
+            raise BlockNotFoundException(f"Blok {self.name} neexistuje!")
         return StepWaitForBlock.name_to_id[name]
 
 
@@ -125,6 +150,15 @@ class DanceAC(AC):
     def on_start(self) -> None:
         logging.info('Start')
         self.statestr = ''
+
+        for stepi, step in self.steps.items():
+            try:
+                step.on_start(self)
+            except DanceStartException as e:
+                self.disp_error(f'Krok {stepi}: '+str(e))
+                self.done()
+                return
+
         self.stepi = 1
         self.on_update()
 
