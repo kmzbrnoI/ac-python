@@ -26,7 +26,7 @@ from utils.dancer import Step, StepJC, StepWaitForBlock, StepDelay, DanceAC, \
         track_is_occupied
 
 STEPS: Dict[int, Step] = {
-    1: StepJC('Klb S1 > Klb PriblLa'),
+    1: StepJC('Klb S1 > Klb PriblL'),
     2: StepWaitForBlock('Klb K1', track_is_occupied),
     3: StepDelay(datetime.timedelta(seconds=5)),
 }

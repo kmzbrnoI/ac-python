@@ -24,6 +24,9 @@ class Step:
     def on_start(self, acn: AC) -> None:
         pass
 
+    def disp_str(self) -> str:
+        return ''
+
 
 class JCNotFoundException(DanceStartException):
     pass
@@ -70,6 +73,9 @@ class StepJC(Step):
             raise JCNotFoundException(f"Jízdní cesta {self.name} neexistuje!")
         return StepJC.name_to_id[name]
 
+    def disp_str(self) -> str:
+        return f'Stavění JC {self.name}'
+
 
 class StepDelay(Step):
     """Delay any time."""
@@ -85,6 +91,9 @@ class StepDelay(Step):
         if datetime.datetime.now() > self.finish:
             self.finish = None
             acn.step_done()
+
+    def disp_str(self) -> str:
+        return f'Čekání {self.delay}'
 
 
 class BlockNotFoundException(DanceStartException):
@@ -133,6 +142,9 @@ class StepWaitForBlock(Step):
             raise BlockNotFoundException(f"Blok {self.name} neexistuje!")
         return StepWaitForBlock.name_to_id[name]
 
+    def disp_str(self) -> str:
+        return f'Čekání na stav bloku {self.name}'
+
 
 def track_is_occupied(block: ac.Block) -> bool:
     return bool(block['blokStav']['stav'] == 'obsazeno')
@@ -149,7 +161,6 @@ class DanceAC(AC):
 
     def on_start(self) -> None:
         logging.info('Start')
-        self.statestr = ''
 
         for stepi, step in self.steps.items():
             try:
@@ -160,7 +171,12 @@ class DanceAC(AC):
                 return
 
         self.stepi = 1
+        self.send_step()
         self.on_update()
+
+    def on_stop(self) -> None:
+        self.statestr = ''
+        self.statestr_send()
 
     def on_update(self) -> None:
         AC.on_update(self)
@@ -177,7 +193,15 @@ class DanceAC(AC):
         logging.info(f'Step {self.stepi} done, '
                      f'going to step {self.stepi+1}...')
         self.stepi += 1
+        self.send_step()
         self.on_update()
+
+    def send_step(self) -> None:
+        if self.stepi in self.steps.keys():
+            if self.running():
+                description = self.steps[self.stepi].disp_str()
+                self.statestr = f'Aktuální krok: {self.stepi}: {description}'
+            self.statestr_send()
 
     def on_block_change(self, block: ac.Block) -> None:
         if (self.running() and
