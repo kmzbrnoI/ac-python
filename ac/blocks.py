@@ -38,7 +38,7 @@ def register_change(func: BlockEvent, *args: str,
     for block_id in args:
         if func not in events[block_id]:
             events[block_id].add(func)
-        register(args)
+    register(args)
     if not args:
         if func not in global_events:
             global_events.add(func)
@@ -51,7 +51,7 @@ def unregister_change(func: BlockEvent, *args: str,
     for block_id in args:
         if func in events[block_id]:
             events[block_id].remove(func)
-        unregister(args)
+    unregister(args)
     if not args:
         if func in global_events:
             global_events.remove(func)
