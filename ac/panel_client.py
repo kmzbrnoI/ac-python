@@ -37,7 +37,7 @@ def _listen(sock: socket.socket) -> None:
     try:
         while True:
             readable, writable, exceptional = select.select(
-                [sock], [sock], [sock], UPDATE_PERIOD
+                [sock], [], [sock], UPDATE_PERIOD
             )
 
             if sock in exceptional:
