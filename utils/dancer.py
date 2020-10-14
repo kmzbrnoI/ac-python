@@ -47,7 +47,7 @@ class StepJC(Step):
         assert isinstance(acn, DanceAC)
         if self.jc is None:
             jcid = self.get_jc_id(self.name)
-            self.jc = ac.pt.get(f'/jc/{jcid}?stav=true')['jc']
+            self.jc = ac.pt_get(f'/jc/{jcid}?stav=true')['jc']
 
         if self.jc['staveni']['postaveno']:
             self.jc = None
@@ -64,7 +64,7 @@ class StepJC(Step):
 
     def get_jc_id(self, name: str) -> int:
         if not StepJC.name_to_id:
-            jcs = ac.pt.get('/jc')['jc']
+            jcs = ac.pt_get('/jc')['jc']
             StepJC.name_to_id = {
                 jc['nazev']: jc['id']
                 for jc in jcs if jc['typ'] == self.type
@@ -113,7 +113,7 @@ class StepWaitForBlock(Step):
         assert isinstance(acn, DanceAC)
         if self.block is None:
             blockid = self.get_block_id(self.name)
-            self.block = ac.pt.get(f'/bloky/{blockid}?stav=true')['blok']
+            self.block = ac.pt_get(f'/bloky/{blockid}?stav=true')['blok']
             if self.checker(self.block):
                 self.block = None
                 acn.step_done()
@@ -134,7 +134,7 @@ class StepWaitForBlock(Step):
 
     def get_block_id(self, name: str) -> int:
         if not StepWaitForBlock.name_to_id:
-            blocks = ac.pt.get('/bloky')['bloky']
+            blocks = ac.pt_get('/bloky')['bloky']
             StepWaitForBlock.name_to_id = {
                 block['nazev']: block['id'] for block in blocks
             }
