@@ -17,6 +17,20 @@ global_events: Set[BlockEvent] = set()
 
 def on_block_change(*args: Union[int, str],
                     **kwargs: Dict[str, Any]) -> BlockDecorator:
+    """
+    Decorate any function to receive changes of (specific) block(s).
+
+    Examples:
+     * @ac.blocks.on_block_change(id1, id2, ..., idn)  # Specific blocks
+       def my_event(self, block: Block):
+     * @ac.blocks.on_block_change()  # All blocks
+       def my_event(self, block: Block):
+
+    Warning: this decorator DOES NOT register events to server.
+    You must manually call register to `register` events on server
+    (atfer you have PanelServer connection and usually after you AC has
+    started).
+    """
     def decorate(function: BlockEvent) -> BlockEvent:
         global events
         global global_events
@@ -31,26 +45,37 @@ def on_block_change(*args: Union[int, str],
     return decorate
 
 
-def register_change(func: BlockEvent, *args: str,
+def register_change(func: BlockEvent, *args: Union[int, str],
                     **kwargs: Tuple[str, Any]) -> None:
+    """
+    Register change event to function & server.
+
+    Do not call `register` when using this function.
+
+    Example:
+    def on_start(self):
+        ac.blocks.register_change(self.on_block_change, 12, 24)
+    """
     global events, global_events
 
     for block_id in args:
-        if func not in events[block_id]:
-            events[block_id].add(func)
+        if func not in events[str(block_id)]:
+            events[str(block_id)].add(func)
     register(args)
     if not args:
         if func not in global_events:
             global_events.add(func)
 
 
-def unregister_change(func: BlockEvent, *args: str,
+def unregister_change(func: BlockEvent, *args: Union[int, str],
                       **kwargs: Tuple[str, Any]) -> None:
+
+    """Unregister change event to function & server."""
     global events, global_events
 
     for block_id in args:
-        if func in events[block_id]:
-            events[block_id].remove(func)
+        if func in events[str(block_id)]:
+            events[str(block_id)].remove(func)
     unregister(args)
     if not args:
         if func in global_events:
@@ -58,6 +83,11 @@ def unregister_change(func: BlockEvent, *args: str,
 
 
 def register(blocks: Iterable[Union[str, int]]) -> None:
+    """
+    Register event on server.
+
+    This function should be called when using event handing via decorators.
+    """
     _send('register', blocks)
 
 
