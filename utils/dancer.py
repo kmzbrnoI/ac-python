@@ -46,31 +46,31 @@ class StepJC(Step):
     def update(self, acn: AC) -> None:
         assert isinstance(acn, DanceAC)
         if self.jc is None:
-            jcid = self.get_jc_id(self.name)
-            self.jc = ac.pt_get(f'/jc/{jcid}?stav=true')['jc']
+            jcid = self.get_jc_id(self.name, acn)
+            self.jc = acn.pt_get(f'/jc/{jcid}?state=true')['jc']
 
-        if self.jc['staveni']['postaveno']:
+        if self.jc['state']['active']:
             self.jc = None
             acn.step_done()
             return
 
-        result = acn.pt_put(f'/jc/{self.jc["id"]}/stav', {})
+        result = acn.pt_put(f'/jc/{self.jc["id"]}/state', {})
         if result['success']:
             self.jc = None
             acn.step_done()
 
     def on_start(self, acn: AC) -> None:
-        self.get_jc_id(self.name)
+        self.get_jc_id(self.name, acn)
 
-    def get_jc_id(self, name: str) -> int:
+    def get_jc_id(self, name: str, acn: AC) -> int:
         if not StepJC.name_to_id:
-            jcs = ac.pt_get('/jc')['jc']
+            jcs = acn.pt_get('/jc')['jc']
             StepJC.name_to_id = {
-                jc['nazev']: jc['id']
-                for jc in jcs if jc['typ'] == self.type
+                jc['name']: jc['id']
+                for jc in jcs if jc['type'] == self.type
             }
         if name not in StepJC.name_to_id.keys():
-            raise JCNotFoundException(f"Jízdní cesta {self.name} neexistuje!")
+            raise JCNotFoundException(f'Jízdní cesta {self.name} neexistuje!')
         return StepJC.name_to_id[name]
 
     def disp_str(self) -> str:
@@ -112,8 +112,8 @@ class StepWaitForBlock(Step):
     def update(self, acn: AC) -> None:
         assert isinstance(acn, DanceAC)
         if self.block is None:
-            blockid = self.get_block_id(self.name)
-            self.block = ac.pt_get(f'/bloky/{blockid}?stav=true')['blok']
+            blockid = self.get_block_id(self.name, acn)
+            self.block = acn.pt_get(f'/blocks/{blockid}?state=true')['block']
             if self.checker(self.block):
                 self.block = None
                 acn.step_done()
@@ -121,7 +121,7 @@ class StepWaitForBlock(Step):
                 ac.blocks.register([self.block['id']])
 
     def on_start(self, acn: AC) -> None:
-        self.get_block_id(self.name)
+        self.get_block_id(self.name, acn)
 
     def on_block_change(self, acn: AC, block: ac.Block) -> None:
         assert isinstance(acn, DanceAC)
@@ -132,11 +132,11 @@ class StepWaitForBlock(Step):
             self.block = None
             acn.step_done()
 
-    def get_block_id(self, name: str) -> int:
+    def get_block_id(self, name: str, acn: AC) -> int:
         if not StepWaitForBlock.name_to_id:
-            blocks = ac.pt_get('/bloky')['bloky']
+            blocks = acn.pt_get('/blocks')['blocks']
             StepWaitForBlock.name_to_id = {
-                block['nazev']: block['id'] for block in blocks
+                block['name']: block['id'] for block in blocks
             }
         if name not in StepWaitForBlock.name_to_id.keys():
             raise BlockNotFoundException(f"Blok {self.name} neexistuje!")
@@ -147,7 +147,7 @@ class StepWaitForBlock(Step):
 
 
 def track_is_occupied(block: ac.Block) -> bool:
-    return bool(block['blokStav']['stav'] == 'obsazeno')
+    return bool(block['blockState']['state'] == 'occupied')
 
 
 class DanceAC(AC):

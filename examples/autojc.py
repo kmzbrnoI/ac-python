@@ -47,7 +47,7 @@ class JCAC(AC):
         self.process_free_jcs()
 
         for jc in self.jcs_remaining.values():
-            ac.blocks.register(jc['useky'])
+            ac.blocks.register(jc['tracks'])
 
     def on_resume(self) -> None:
         self.set_color(0xFFFF00)
@@ -56,10 +56,10 @@ class JCAC(AC):
     def filter_done_jcs(self) -> None:
         remaining = {}
         for jc in self.jcs_remaining.values():
-            if not jc['staveni']['postaveno']:
+            if not jc['state']['active']:
                 remaining[jc['id']] = jc
             else:
-                self.statestr_add(f'JC {jc["nazev"]} již postavena, nestavím.')
+                self.statestr_add(f'JC {jc["name"]} již postavena, nestavím.')
         self.statestr_send()
         self.jcs_remaining = remaining
 
@@ -72,17 +72,17 @@ class JCAC(AC):
 
     def process_jcs(self, jcs: List[JC]) -> None:
         for jc in jcs:
-            logging.info(f'Processing JC {jc["nazev"]}...')
-            result = self.pt_put(f'/jc/{jc["id"]}/stav', {'ab': True})
+            logging.info(f'Processing JC {jc["name"]}...')
+            result = self.pt_put(f'/jc/{jc["id"]}/state', {'ab': True})
             if result['success']:
-                self.statestr_add(f'Postavena JC {jc["nazev"]}.')
+                self.statestr_add(f'Postavena JC {jc["name"]}.')
                 logging.info('ok')
-                ac.blocks.unregister(jc['useky'])
+                ac.blocks.unregister(jc['tracks'])
             else:
-                self.statestr_add(f'Nelze postavit JC {jc["nazev"]}.')
-                self.disp_error(f'Nelze postavit JC {jc["nazev"]}')
-                logging.error(f'Unable to process JC {jc["nazev"]}: ' +
-                              str(result['bariery']))
+                self.statestr_add(f'Nelze postavit JC {jc["name"]}.')
+                self.disp_error(f'Nelze postavit JC {jc["name"]}')
+                logging.error(f'Unable to process JC {jc["name"]}: ' +
+                              str(result['barriers']))
                 self.set_color(0xFF0000)
 
             del self.jcs_remaining[jc['id']]
@@ -90,14 +90,14 @@ class JCAC(AC):
 
 
 def jcs(ids: List[int]) -> Dict[int, JC]:
-    return {jc_id: ac.pt_get(f'/jc/{jc_id}?stav=true')['jc'] for jc_id in ids}
+    return {jc_id: ac.pt.get(f'/jc/{jc_id}?state=true')['jc'] for jc_id in ids}
 
 
 def free_jcs(jcs: List[JC]) -> List[JC]:
     result = []
     for jc in jcs:
-        free = all([utils.blocks.state(track_id)['stav'] == 'uvolneno'
-                    for track_id in jc['useky']])
+        free = all([utils.blocks.state(track_id)['state'] == 'free'
+                    for track_id in jc['tracks']])
         if free:
             result.append(jc)
 
