@@ -125,7 +125,7 @@ def on_message(parsed: List[str]) -> None:
 
 
 def _call_change(id_: str) -> None:
-    pt_block = pt.get(f'/bloky/{id_}?stav=true')['blok']
+    pt_block = pt.get(f'/blocks/{id_}?state=true')['block']
     for event in global_events:
         event(pt_block)
     for event in events[id_]:
