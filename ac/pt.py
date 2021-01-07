@@ -13,6 +13,10 @@ server = ''
 PORT = 5823
 
 
+class PTHttpException(Exception):
+    pass
+
+
 def _send(path: str, method: str, req_data: Dict[str, Any],
           user: str = '', password: str = '') -> Dict[str, Any]:
     if not path.startswith('/'):
@@ -36,10 +40,16 @@ def _send(path: str, method: str, req_data: Dict[str, Any],
 
 def get(path: str) -> Dict[str, Any]:
     logging.debug(f'PT GET {path}')
-    return _send(path, 'GET', {})
+    response = _send(path, 'GET', {})
+    if 'errors' in response:
+        raise PTHttpException(response['errors'])
+    return response
 
 
 def put(path: str, req_data: Dict[str, Any], username: str,
         password: str) -> Dict[str, Any]:
     logging.debug(f'PT PUT {path}')
-    return _send(path, 'PUT', req_data, username, password)
+    response = _send(path, 'PUT', req_data, username, password)
+    if 'errors' in response:
+        raise PTHttpException(response['errors'])
+    return response
