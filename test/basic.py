@@ -26,7 +26,7 @@ class MyAC(AC):
     def on_start(self) -> None:
         logging.info(f'{self.id}: start')
         assert self.state == State.RUNNING
-        assert 'blokStav' in self.pt_put('/blokStav/1', {'blokStav': {}})
+        assert 'blockState' in self.pt_put('/blockState/1', {'blockState': {}})
 
     def on_stop(self) -> None:
         logging.info(f'{self.id}: stop')
@@ -42,12 +42,12 @@ class MyAC(AC):
 
 @ac.blocks.on_block_change()
 def _on_block_change(block: ac.Block) -> None:
-    print(f'Changed: {block["nazev"]}')
+    print(f'Changed: {block["name"]}')
 
 
 @ac.blocks.on_block_change(1, 2)
 def _on_block_change_(block: ac.Block) -> None:
-    print(f'Changed 1|2: {block["nazev"]}')
+    print(f'Changed 1|2: {block["name"]}')
 
 
 if __name__ == '__main__':
