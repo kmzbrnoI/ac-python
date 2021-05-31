@@ -130,3 +130,10 @@ def _call_change(id_: str) -> None:
         event(pt_block)
     for event in events[id_]:
         event(pt_block)
+
+
+def dict() -> Dict[str, Block]:
+    return {
+        int(block['id']): block
+        for block in pt.get('/blocks')['blocks']
+    }
