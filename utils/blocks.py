@@ -12,10 +12,10 @@ blocks_state: Dict[int, Block] = {}
 
 def state(id_: int) -> Dict[str, Any]:
     if id_ not in blocks_state:
-        blocks_state[id_] = ac.pt.get(f'/blokStav/{id_}')['blokStav']
+        blocks_state[id_] = ac.pt.get(f'/blockState/{id_}')['blockState']
     return blocks_state[id_]
 
 
 @ac.blocks.on_block_change()
 def _on_block_change(block: ac.Block) -> None:
-    blocks_state[block['id']] = block['blokStav']
+    blocks_state[block['id']] = block['blockState']
