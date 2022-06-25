@@ -126,9 +126,10 @@ def on_message(parsed: List[str]) -> None:
 
 def _call_change(id_: str) -> None:
     pt_block = pt.get(f'/blocks/{id_}?state=true')['block']
-    for event in global_events:
+    # Use copy because callback could change the set
+    for event in global_events.copy():
         event(pt_block)
-    for event in events[id_]:
+    for event in events[id_].copy():
         event(pt_block)
 
 
