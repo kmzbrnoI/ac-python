@@ -133,7 +133,7 @@ def _call_change(id_: str) -> None:
         event(pt_block)
 
 
-def dict(state: bool = False) -> Dict[str, Block]:
+def dict(state: bool = False) -> Dict[int, Block]:
     url = '/blocks'
     if state:
         url += '?state=true'
