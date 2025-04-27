@@ -1,4 +1,4 @@
-"""Library for executing user-defined dance."""
+"""Library for executing a user-defined predefined steps ("dance")."""
 
 import logging
 from typing import Any, Dict, Optional, Callable

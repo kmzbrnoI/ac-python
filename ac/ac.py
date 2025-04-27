@@ -19,9 +19,12 @@ ACEvent = Callable[['AC'], None]
 
 class AC:
     """
-    AC class represents a single AC. It holds its state and allows user
-    to call methods on it. Interaction with Panel Server as well as PT Server
+    AC class is s base class representing a single AC. It holds its state and allows user
+    to call methods on it. Interaction with Panel Server as well as with PT Server
     should go throug instance of AC.
+    To implement specific AC functionality, one should inherit its own class
+    from 'AC' class and implement AC-specific functionality in bodies of 'on_*' methods
+    or react to e.g. blocks change (see blocks.py). See examples.
     """
 
     def __init__(self, id_: str, password: str = '') -> None:
@@ -33,31 +36,58 @@ class AC:
         self.fg_color = 0xFFFF00
 
     def on_register(self) -> None:
+        """
+        This method is called when the instance is registered with the hJOPserver's AC block.
+        Body of this method is supposed to be implemented in the derived class.
+        """
         pass
 
     def on_unregister(self) -> None:
+        """
+        This method is called when the instance is unregistered from the hJOPserver's AC block.
+        Body of this method is supposed to be implemented in the derived class.
+        """
         pass
 
     def on_start(self) -> None:
+        """
+        This method is called when the dispatcher clicks 'START' on the AC block in hJOPpanel.
+        Body of this method is supposed to be implemented in the derived class.
+        """
         pass
 
     def on_stop(self) -> None:
-        pass
-
-    def on_resume(self) -> None:
+        """
+        This method is called when the dispatcher clicks 'STOP' on the AC block in hJOPpanel.
+        Body of this method is supposed to be implemented in the derived class.
+        """
         pass
 
     def on_pause(self) -> None:
+        """
+        This method is called when the dispatcher clicks 'PAUZA' on the AC block in hJOPpanel.
+        Body of this method is supposed to be implemented in the derived class.
+        """
+        pass
+
+    def on_resume(self) -> None:
+        """
+        This method is called when the dispatcher clicks 'POKRAČ' on the AC block in hJOPpanel.
+        Body of this method is supposed to be implemented in the derived class.
+        """
         pass
 
     def on_update(self) -> None:
+        """Called periodically."""
         if not self.registered:
             self.register(self.password)
 
     def on_connect(self) -> None:
+        """Called when panel client connects to hJOPserver"""
         self.register(self.password)
 
     def on_disconnect(self) -> None:
+        """Called when panel client disconnects from hJOPserver"""
         pass
 
     def running(self) -> bool:
@@ -70,9 +100,11 @@ class AC:
         return self.state == State.STOPPED
 
     def done(self) -> None:
+        """Call when you need to signalize that the AC is finished."""
         panel_client.send(f'-;AC;{self.id};CONTROL;DONE')
 
     def disp_error(self, message: str) -> None:
+        """Display error to the dispatcher."""
         panel_client.send(f'-;AC;{self.id};CONTROL;ERROR;DISPBOTTOM;{message}')
 
     def register(self, password: str) -> None:
@@ -84,17 +116,25 @@ class AC:
         self.password = ''
         panel_client.send(f'-;AC;{self.id};LOGOUT')
 
+    """
+    AC client can send multiline 'state' messages to the server.
+    The messages are show in hJOPpanel under 'INFO' option in the AC block's menu.
+    """
+
     def statestr_send(self) -> None:
+        """Send whole 'state' string to the hJOPserver."""
         assert '{' not in self.statestr and '}' not in self.statestr
         lines = ','.join(['{'+line+'}' for line in self.statestr.split('\n')])
         lines = '{' + lines + '}'
         panel_client.send(f'-;AC;{self.id};CONTROL;STATE;{lines}')
 
     def statestr_add(self, s: str) -> None:
+        """Add single line to the 'state' string."""
         assert '{' not in s and '}' not in s
         self.statestr += s + '\n'
 
     def set_color(self, color: int) -> None:
+        """Set color of the AC block in hJOPpanel (e.g. to indicate warning/error state)."""
         self.color = color
         hexcolor = hex(color)[2:].zfill(6)
         panel_client.send(f'-;AC;{self.id};CONTROL;FG-COLOR;{hexcolor}')

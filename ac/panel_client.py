@@ -155,8 +155,10 @@ def _connect(server: str, port: int) -> socket.socket:
 
 
 def init(server: str, port: int) -> None:
-    """Infinite function to open & keep open socket with Panel server.
-    Triest to restore connection in case of connection loss."""
+    """
+    Infinite function to open & keep open socket with Panel server.
+    Tries to restore connection in case of connection loss.
+    """
     global panel_socket
     pt.server = server
 

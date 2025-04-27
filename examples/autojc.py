@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Automatically process predefined JCs.
+Activate JCs passed as arguments as soon as all their tracks are free.
 
 Usage:
   autojc.py [options] <block-id> <password> JCS ...

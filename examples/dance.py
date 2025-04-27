@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Automatically process predefined JCs.
+Execute predefined steps: JC activation, sleeping, waiting for track freeing etc.
 
 Usage:
   dance.py [options] <block-id> <password>
