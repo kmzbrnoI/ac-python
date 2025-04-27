@@ -5,14 +5,14 @@ This repository contains Python 3 package `ac`, which is a library for using
 [hJOPserver's](https://github.com/kmzbrnoI/hJOPserver) [AC
 API](https://github.com/kmzbrnoI/hJOPserver/wiki/panelServer-ac) nicely.
 
-See <`test/basic.py`> or <`examples`> for examples of using.
+See `test/basic.py` or `examples` for examples of using.
 
 ## Howto create your own AC client
 
-* If you just want to execute predefined steps, look at <`examples/dance.py`>
+* If you just want to execute predefined steps, look at `examples/dance.py`
   and simply modify the file.
 * If you want to implement general AC client, inherit your own class from 'AC'
-  class. Look at <`examples/autojc.py`>.
+  class. Look at `examples/autojc.py`.
 
 ## Project structure
 
