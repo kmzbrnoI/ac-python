@@ -154,7 +154,7 @@ def _connect(server: str, port: int) -> socket.socket:
     return sock
 
 
-def init(server: str, port: int) -> None:
+def init(server: str, port: int, app_name: str = '') -> None:
     """
     Infinite function to open & keep open socket with Panel server.
     Tries to restore connection in case of connection loss.
@@ -170,7 +170,7 @@ def init(server: str, port: int) -> None:
             connected = True
             logging.info('Socket opened')
             panel_socket = sock
-            send('-;HELLO;{0}'.format(CLIENT_PROTOCOL_VERSION), sock)
+            send(f'-;HELLO;{CLIENT_PROTOCOL_VERSION};{app_name}', sock)
             _listen(sock)
         except DisconnectedError:
             logging.info('Disconnected from server')
