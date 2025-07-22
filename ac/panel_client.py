@@ -57,7 +57,7 @@ def _listen(sock: socket.socket) -> None:
                 events.call(events.evs_on_update)
 
     except Exception as e:
-        logging.error('Connection error: {0}'.format(e))
+        logging.error(f'Connection error: {e}')
 
 
 def _handle_ready_read(sock: socket.socket) -> None:
@@ -74,14 +74,13 @@ def _handle_ready_read(sock: socket.socket) -> None:
 
     while q:
         item = q.popleft()
-        logging.debug('> {0}'.format(item.strip()))
+        logging.debug(f'> {item.strip()}')
 
         if item.endswith('\n'):
             try:
                 _process_message(sock, item.strip())
             except Exception as e:
-                logging.warning('Message processing error: '
-                                '{0}!'.format(str(e)))
+                logging.warning(f'Message processing error: {str(e)}!')
                 traceback.print_exc()
 
 
@@ -93,11 +92,11 @@ def send(message: str, sock: Optional[socket.socket] = None) -> None:
     assert sock is not None
 
     try:
-        logging.debug('< {0}'.format(message))
+        logging.debug(f'< {message}')
         sock.send((message + '\n').encode('UTF-8'))
 
     except Exception as e:
-        logging.error('Connection exception: {0}'.format(e))
+        logging.error(f'Connection exception: {e}')
 
 
 def _process_message(sock: socket.socket, message: str) -> None:
@@ -114,7 +113,7 @@ def _process_message(sock: socket.socket, message: str) -> None:
     elif (parsed[1] == 'PING' and len(parsed) > 2 and
           parsed[2].upper() == 'REQ-RESP'):
         if len(parsed) > 3:
-            send('-;PONG;{0}'.format(parsed[3]), sock)
+            send(f'-;PONG;{parsed[3]}', sock)
         else:
             send('-;PONG', sock)
     elif (len(parsed) >= 4 and parsed[0] == '-' and parsed[1] == 'AC'):
@@ -126,11 +125,10 @@ def _process_message(sock: socket.socket, message: str) -> None:
 
 def _process_hello(parsed: List[str]) -> None:
     version = float(parsed[2])
-    logging.info('Server version: {0}.'.format(version))
+    logging.info(f'Server version: {version}')
 
     if version < 1:
-        raise OutdatedVersionError('Outdated version of server protocol: '
-                                   '{0}!'.format(version))
+        raise OutdatedVersionError(f'Outdated version of server protocol: {version}!')
 
     for ac_ in ACs.values():
         try:
