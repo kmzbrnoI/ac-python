@@ -16,7 +16,7 @@ Options:
 """
 
 import logging
-from docopt import docopt  # type: ignore
+from docopt import docopt
 from typing import Any, Dict, List
 
 import ac
@@ -68,7 +68,7 @@ class JCAC(AC):
 
         if not self.jcs_remaining:
             self.done()
-            logging.info(f'All JCs processed.')
+            logging.info('All JCs processed.')
 
     def process_jcs(self, jcs: List[JC]) -> None:
         for jc in jcs:

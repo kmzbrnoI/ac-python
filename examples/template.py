@@ -16,7 +16,7 @@ Options:
 """
 
 import logging
-from docopt import docopt  # type: ignore
+from docopt import docopt
 
 import ac
 from ac import ACs, AC

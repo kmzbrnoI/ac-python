@@ -16,7 +16,7 @@ Options:
 """
 
 import logging
-from docopt import docopt  # type: ignore
+from docopt import docopt
 from typing import Dict
 import datetime
 
