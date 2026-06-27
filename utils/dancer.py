@@ -54,7 +54,7 @@ class StepJC(Step):
             acn.step_done()
             return
 
-        result = acn.pt_put(f'/jc/{self.jc["id"]}/state', {})
+        result = acn.pt_put(f'/jc/{self.jc["id"]}/activate', {})
         if result['success']:
             self.jc = None
             acn.step_done()
