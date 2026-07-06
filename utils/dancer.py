@@ -183,6 +183,7 @@ class DanceAC(AC):
         self.on_update()
 
     def on_stop(self) -> None:
+        logging.info('Stop')
         self.statestr = ''
         self.statestr_send()
 
@@ -199,7 +200,7 @@ class DanceAC(AC):
 
     def step_done(self) -> None:
         logging.info(f'Step {self.stepi} done, '
-                     f'going to step {self.stepi+1}...')
+                     f'going to step {self.stepi+1} - {self.steps[self.stepi+1].disp_str()}...')
         self.stepi += 1
         self.send_step()
         self.on_update()
