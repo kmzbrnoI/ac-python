@@ -154,9 +154,10 @@ class DanceAC(AC):
     """This AC executes predefined steps."""
 
     def __init__(self, id_: str, password: str,
-                 steps: Dict[int, Step]) -> None:
+                 steps: Dict[int, Step], precond_check: Optional[Callable[[], str]]) -> None:
         AC.__init__(self, id_, password)
         self.steps = steps
+        self.precond_check = precond_check
         self.stepi = 0
 
     def on_start(self) -> None:
@@ -167,6 +168,13 @@ class DanceAC(AC):
                 step.on_start(self)
             except DanceStartException as e:
                 self.disp_error(f'Krok {stepi}: '+str(e))
+                self.done()
+                return
+
+        if self.precond_check is not None:
+            precond_error = self.precond_check()
+            if precond_error != '':
+                self.disp_error(f'Nesplněny počáteční podmínky: {precond_error}!')
                 self.done()
                 return
 
