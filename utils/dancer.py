@@ -150,6 +150,21 @@ def track_is_occupied(block: ac.Block) -> bool:
     return block['blockState']['state'] == 'occupied'
 
 
+class StepSetColor(Step):
+    """Set AC color in panel."""
+
+    def __init__(self, color: int) -> None:
+        self.color = color
+
+    def update(self, acn: AC) -> None:
+        assert isinstance(acn, DanceAC)
+        acn.set_color(self.color)
+        acn.step_done()
+
+    def disp_str(self) -> str:
+        return f'Nastavení barvu AC bloku'
+
+
 class DanceAC(AC):
     """This AC executes predefined steps."""
 
