@@ -169,11 +169,12 @@ class DanceAC(AC):
     """This AC executes predefined steps."""
 
     def __init__(self, id_: str, password: str,
-                 steps: Dict[int, Step], precond_check: Optional[Callable[[], str]]) -> None:
+                 steps: Dict[int, Step], precond_check: Optional[Callable[[], str]], repeat: bool = False) -> None:
         AC.__init__(self, id_, password)
         self.steps = steps
         self.precond_check = precond_check
         self.stepi = 0
+        self.repeat = repeat
 
     def on_start(self) -> None:
         logging.info('Start')
@@ -215,9 +216,20 @@ class DanceAC(AC):
             self.done()
 
     def step_done(self) -> None:
-        logging.info(f'Step {self.stepi} done, '
-                     f'going to step {self.stepi+1}: {self.steps[self.stepi+1].disp_str()}...')
+        logging.info(f'Step {self.stepi} done')
         self.stepi += 1
+
+        if self.stepi not in self.steps:
+            if self.repeat:
+                self.stepi = min(self.steps.keys())
+                logging.info(f'AC finished, repeating...')
+            else:
+                logging.info('Done')
+                self.done()
+
+        if self.stepi in self.steps:
+            logging.info(f'Executing step {self.stepi}: {self.steps[self.stepi].disp_str()}...')
+
         self.send_step()
         self.on_update()
 
