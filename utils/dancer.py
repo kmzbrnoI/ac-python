@@ -162,7 +162,7 @@ class StepSetColor(Step):
         acn.step_done()
 
     def disp_str(self) -> str:
-        return f'Nastavení barvu AC bloku'
+        return f'Nastavení barvy AC bloku'
 
 
 class DanceAC(AC):
@@ -195,6 +195,7 @@ class DanceAC(AC):
 
         self.stepi = min(self.steps.keys())
         self.send_step()
+        logging.info(f'Executing step {self.stepi}: {self.steps[self.stepi].disp_str()}...')
         self.on_update()
 
     def on_stop(self) -> None:
@@ -215,7 +216,7 @@ class DanceAC(AC):
 
     def step_done(self) -> None:
         logging.info(f'Step {self.stepi} done, '
-                     f'going to step {self.stepi+1} - {self.steps[self.stepi+1].disp_str()}...')
+                     f'going to step {self.stepi+1}: {self.steps[self.stepi+1].disp_str()}...')
         self.stepi += 1
         self.send_step()
         self.on_update()
