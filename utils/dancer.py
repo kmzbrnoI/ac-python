@@ -147,7 +147,7 @@ class StepWaitForBlock(Step):
 
 
 def track_is_occupied(block: ac.Block) -> bool:
-    return bool(block['blockState']['state'] == 'occupied')
+    return block['blockState']['state'] == 'occupied'
 
 
 class DanceAC(AC):
