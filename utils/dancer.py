@@ -193,7 +193,7 @@ class DanceAC(AC):
                 self.done()
                 return
 
-        self.stepi = 1
+        self.stepi = min(self.steps.keys())
         self.send_step()
         self.on_update()
 
