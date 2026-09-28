@@ -27,6 +27,9 @@ class Step:
     def disp_str(self) -> str:
         return ''
 
+    def enter(self) -> None:
+        pass
+
 
 class JCNotFoundException(DanceStartException):
     pass
@@ -84,10 +87,12 @@ class StepDelay(Step):
         self.delay = delay
         self.finish: Optional[datetime.datetime] = None
 
+    def enter(self) -> None:
+        self.finish = datetime.datetime.now() + self.delay
+
     def update(self, acn: AC) -> None:
         assert isinstance(acn, DanceAC)
-        if self.finish is None:
-            self.finish = datetime.datetime.now() + self.delay
+        assert self.finish is not None
         if datetime.datetime.now() > self.finish:
             self.finish = None
             acn.step_done()
@@ -197,6 +202,7 @@ class DanceAC(AC):
         self.stepi = min(self.steps.keys())
         self.send_step()
         logging.info(f'Executing step {self.stepi}: {self.steps[self.stepi].disp_str()}...')
+        self.steps[self.stepi].enter()
         self.on_update()
 
     def on_stop(self) -> None:
@@ -217,6 +223,7 @@ class DanceAC(AC):
 
     def step_done(self) -> None:
         logging.info(f'Step {self.stepi} done')
+
         self.stepi += 1
 
         if self.stepi not in self.steps:
@@ -229,6 +236,7 @@ class DanceAC(AC):
 
         if self.stepi in self.steps:
             logging.info(f'Executing step {self.stepi}: {self.steps[self.stepi].disp_str()}...')
+            self.steps[self.stepi].enter()
 
         self.send_step()
         self.on_update()
