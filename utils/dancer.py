@@ -184,18 +184,20 @@ class DanceAC(AC):
     def on_start(self) -> None:
         logging.info('Start')
 
+        if self.precond_check is not None:
+            precond_error = self.precond_check()
+            if precond_error != '':
+                error_msg = f'Nesplněny počáteční podmínky: {precond_error}!'
+                logging.info(error_msg)
+                self.disp_error(error_msg)
+                self.done()
+                return
+
         for stepi, step in self.steps.items():
             try:
                 step.on_start(self)
             except DanceStartException as e:
                 self.disp_error(f'Krok {stepi}: '+str(e))
-                self.done()
-                return
-
-        if self.precond_check is not None:
-            precond_error = self.precond_check()
-            if precond_error != '':
-                self.disp_error(f'Nesplněny počáteční podmínky: {precond_error}!')
                 self.done()
                 return
 
