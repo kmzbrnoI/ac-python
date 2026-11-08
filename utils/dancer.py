@@ -180,6 +180,7 @@ class DanceAC(AC):
         self.precond_check = precond_check
         self.stepi = 0
         self.repeat = repeat
+        self._running: bool = False
 
     def on_start(self) -> None:
         logging.info('Start')
@@ -205,16 +206,22 @@ class DanceAC(AC):
         self.send_step()
         logging.info(f'Executing step {self.stepi}: {self.steps[self.stepi].disp_str()}...')
         self.steps[self.stepi].enter()
+        self._running = True
         self.on_update()
 
     def on_stop(self) -> None:
         logging.info('Stop')
+        self._running = False
         self.statestr = ''
         self.statestr_send()
 
+    def done(self) -> None:
+        self._running = False
+        super().done()
+
     def on_update(self) -> None:
         AC.on_update(self)
-        if not self.running():
+        if not self._running or not self.running():
             return
 
         if self.stepi in self.steps:
