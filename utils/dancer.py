@@ -98,7 +98,7 @@ class StepDelay(Step):
             acn.step_done()
 
     def disp_str(self) -> str:
-        return f'Čekání {self.delay}'
+        return f'Čekání {self.delay}' + (' do '+self.finish.strftime('%H:%M:%S') if self.finish is not None else '')
 
 
 class BlockNotFoundException(DanceStartException):
